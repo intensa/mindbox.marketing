@@ -361,11 +361,10 @@ class Event
                     'ids'         => [Options::getModuleOption('WEBSITE_ID') => $arFields[ 'USER_ID' ]]
                 ];
 
-            $isSubscribed = true;
-
-            if ($arFields['UF_IS_SUBSCRIBED'] === '0') {
-                $isSubscribed = false;
-            }
+                $isSubscribed = true;
+                if ($arFields['UF_MB_IS_SUBSCRIBED'] === '0') {
+                    $isSubscribed = false;
+                }
 
                 $fields = array_filter($fields, function ($item) {
                     return isset($item);
@@ -747,9 +746,6 @@ class Event
         }
 
         $orderDTO->setCustomer($customer);
-
-
-
 
         try {
             if (\Mindbox\Helper::isUnAuthorizedOrder($arUser) || (is_object($USER) && !$USER->IsAuthorized())) {
@@ -1171,14 +1167,14 @@ class Event
             }
 
             $isSubscribed = true;
-            if ($arUser['UF_IS_SUBSCRIBED'] === '0') {
+            if ($arOrderProperty['UF_MB_IS_SUBSCRIBED'] === 'N') {
                 $isSubscribed = false;
             }
-
             $subscriptions = [
                 'subscription' => [
-                    'brand'          => Options::getModuleOption('BRAND'),
-                    'isSubscribed'   => $isSubscribed,
+                    'brand' =>  Options::getModuleOption('BRAND'),
+                    'pointOfContact' => 'Email',
+                    'isSubscribed'   => $isSubscribed
                 ]
             ];
             $customer->setSubscriptions($subscriptions);
@@ -1604,6 +1600,16 @@ class Event
             return isset($item);
         });
 
+        $isSubscribed = false;
+        if ($arFields['UF_MB_IS_SUBSCRIBED'] === '1') {
+            $isSubscribed = true;
+        }
+        $fields[ 'subscriptions' ] = [[
+                'brand' =>  Options::getModuleOption('BRAND'),
+                'pointOfContact' => 'Email',
+                'isSubscribed'   => $isSubscribed
+            ]
+        ];
         $customFields = [];
         $ufFields = array_filter($arFields, function($value, $key) {
             return strpos($key, 'UF_') !== false;
@@ -1804,16 +1810,8 @@ class Event
         }
 
         try {
-            if (!empty($lines)) {
-                $mindbox->productList()->setProductList(
-                    new ProductListItemRequestCollection($lines),
-                    Options::getOperationName('setProductList')
-                )->sendRequest();
-            } else {
-                $mindbox->productList()->clearCart(
-                    Options::getOperationName('clearCart')
-                )->sendRequest();
-            }
+            $mindbox->productList()->setProductList(new ProductListItemRequestCollection($lines),
+                Options::getOperationName('setProductList'))->sendRequest();
         } catch (Exceptions\MindboxClientErrorException $e) {
         } catch (Exceptions\MindboxClientException $e) {
             $lastResponse = $mindbox->productList()->getLastResponse();
