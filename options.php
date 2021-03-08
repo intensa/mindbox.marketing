@@ -285,8 +285,6 @@ $arAllOptions = array(
     ['', '', Helper::getAddOrderMatchButton('order_status_module_button_add'), ['statichtml']]
 );
 
-var_dump(COption::getOptionString(ADMIN_MODULE_NAME, 'ORDER_STATUS_FIELDS_MATCH'));
-var_dump(Helper::getBitrixOrderStatusList());
 if (!empty(COption::GetOptionString(ADMIN_MODULE_NAME, 'CATALOG_IBLOCK_ID', ''))) {
     if (YmlFeedMindbox::getIblockInfo(Options::getModuleOption("CATALOG_IBLOCK_ID"))['VERSION'] === '1') {
         $arAllOptions['CATALOG_PROPS_UPGRADE'] = ['note' => getMessage(
