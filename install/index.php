@@ -1,4 +1,5 @@
-<?php
+<?
+require  __DIR__ . '/../include.php';
 
 use Bitrix\Main\Application;
 use Bitrix\Main\Config\Option;
@@ -169,109 +170,27 @@ class mindbox_marketing extends CModule
         Option::delete($this->MODULE_ID);
     }
 
-    /**
-     * Добавляем события
-     * @return bool
-     */
-    function InstallEvents()
-    {
-        $eventManager = \Bitrix\Main\EventManager::getInstance();
-        $eventManager->registerEventHandlerCompatible(
-            "main",
-            "OnAfterUserAuthorize",
-            $this->MODULE_ID,
-            "\Mindbox\Event",
-            "OnAfterUserAuthorizeHandler",
-            1000
-        );
-        $eventManager->registerEventHandlerCompatible(
-            "main",
-            "OnBeforeUserRegister",
-            $this->MODULE_ID,
-            "\Mindbox\Event",
-            "OnBeforeUserRegisterHandler",
-            1000
-        );
-        $eventManager->registerEventHandlerCompatible(
-            "main",
-            "OnAfterUserRegister",
-            $this->MODULE_ID,
-            "\Mindbox\Event",
-            "OnAfterUserRegisterHandler",
-            1000
-        );
-        $eventManager->registerEventHandlerCompatible(
-            "main",
-            "OnBeforeUserUpdate",
-            $this->MODULE_ID,
-            "\Mindbox\Event",
-            "OnBeforeUserUpdateHandler",
-            1000
-        );
-        $eventManager->registerEventHandlerCompatible(
-            "main",
-            "OnBeforeUserAdd",
-            $this->MODULE_ID,
-            "\Mindbox\Event",
-            "OnBeforeUserAddHandler",
-            1000
-        );
-        $eventManager->registerEventHandlerCompatible(
-            "main",
-            "OnAfterUserAdd",
-            $this->MODULE_ID,
-            "\Mindbox\Event",
-            "OnAfterUserAddHandler",
-            1000
-        );
-        $eventManager->registerEventHandlerCompatible(
-            "sale",
-            "OnSaleBasketBeforeSaved",
-            $this->MODULE_ID,
-            "\Mindbox\Event",
-            "OnSaleBasketBeforeSavedHadler",
-            1000
-        );
-        $eventManager->registerEventHandlerCompatible(
-            "sale",
-            "OnSaleOrderBeforeSaved",
-            $this->MODULE_ID,
-            "\Mindbox\Event",
-            "OnSaleOrderBeforeSavedHandler",
-            1000
-        );
-        $eventManager->registerEventHandlerCompatible(
-            "sale",
-            "OnSaleOrderSaved",
-            $this->MODULE_ID,
-            "\Mindbox\Event",
-            "OnSaleOrderSavedHandler",
-            1000
-        );
+	/**
+	 * Добавляем события
+	 * @return bool
+	 */
+	function InstallEvents()
+	{
+		$moduleEventController = new \Mindbox\EventController();
+		$moduleEventController->installEvents();
+		return true;
+	}
 
-        return true;
-    }
-
-    /**
-     * Удаляем события
-     * @return bool
-     */
-    function UnInstallEvents()
-    {
-        $eventManager = \Bitrix\Main\EventManager::getInstance();
-        $eventManager->unRegisterEventHandler("main", "OnAfterUserAuthorize", $this->MODULE_ID);
-        $eventManager->unRegisterEventHandler("main", "OnAfterUserRegister", $this->MODULE_ID);
-        $eventManager->unRegisterEventHandler("main", "OnBeforeUserRegister", $this->MODULE_ID);
-        $eventManager->unRegisterEventHandler("main", "OnBeforeUserUpdate", $this->MODULE_ID);
-        $eventManager->unRegisterEventHandler("main", "OnBeforeUserAdd", $this->MODULE_ID);
-        $eventManager->unRegisterEventHandler("main", "OnAfterUserAdd", $this->MODULE_ID);
-        $eventManager->unRegisterEventHandler("sale", "OnSaleBasketSaved", $this->MODULE_ID);
-        $eventManager->unRegisterEventHandler("sale", "OnBasketAdd", $this->MODULE_ID);
-        $eventManager->unRegisterEventHandler("sale", "OnBasketDelete", $this->MODULE_ID);
-        $eventManager->unRegisterEventHandler("sale", "OnBasketUpdate", $this->MODULE_ID);
-
-        return true;
-    }
+	/**
+	 * Удаляем события
+	 * @return bool
+	 */
+	function UnInstallEvents()
+	{
+		$moduleEventController = new \Mindbox\EventController();
+		$moduleEventController->unInstallEvents();
+		return true;
+	}
 
 
     function InstallFiles()

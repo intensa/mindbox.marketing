@@ -37,11 +37,17 @@ Loader::includeModule('main');
  */
 class Event
 {
+    /**
+     * @var
+     */
     protected $mindbox;
 
     const TRACKER_JS_FILENAME = "https://api.mindbox.ru/scripts/v1/tracker.js";
 
     /**
+     * @bitrixModuleId main
+     * @bitrixEventCode OnAfterUserAuthorize
+     * @optionNameRu После авторизации пользователя
      * @param $arUser
      * @return bool
      */
@@ -156,6 +162,13 @@ class Event
         return true;
     }
 
+    /**
+     * @bitrixModuleId main
+     * @bitrixEventCode OnBeforeUserRegisterHandler
+     * @optionNameRu Перед регистрацией пользователя
+     * @param $arFields
+     * @return false
+     */
     public function OnBeforeUserRegisterHandler(&$arFields)
     {
 
@@ -324,6 +337,13 @@ class Event
         }
     }
 
+    /**
+     * @bitrixModuleId main
+     * @bitrixEventCode OnAfterUserRegister
+     * @optionNameRu После регистрации пользователя
+     * @param $arFields
+     * @return bool
+     */
     public function OnAfterUserRegisterHandler(&$arFields)
     {
         global $APPLICATION;
@@ -451,6 +471,13 @@ class Event
         return $arFields;
     }
 
+    /**
+     * @bitrixModuleId main
+     * @bitrixEventCode OnBeforeUserUpdate
+     * @optionNameRu Перед обновлением пользователя
+     * @param $arFields
+     * @return bool
+     */
     public function OnBeforeUserUpdateHandler(&$arFields)
     {
         global $APPLICATION;
@@ -553,6 +580,13 @@ class Event
         return true;
     }
 
+    /**
+     * @bitrixModuleId sale
+     * @bitrixEventCode OnSaleOrderBeforeSaved
+     * @optionNameRu Перед сохранением заказа
+     * @param $order
+     * @return Main\EventResult
+     */
     public function OnSaleOrderBeforeSavedHandler($order)
     {
         $standartMode = \COption::GetOptionString('mindbox.marketing', 'MODE') == 'standard';
@@ -828,6 +862,13 @@ class Event
         return new \Bitrix\Main\EventResult(\Bitrix\Main\EventResult::SUCCESS);
     }
 
+    /**
+     * @bitrixModuleId sale
+     * @bitrixEventCode OnSaleOrderSaved
+     * @optionNameRu После сохранения заказа
+     * @param $order
+     * @return Main\EventResult
+     */
     public function OnSaleOrderSavedHandler($order)
     {
         $mindbox = static::mindbox();
@@ -1308,6 +1349,14 @@ class Event
         return new Main\EventResult(Main\EventResult::SUCCESS);
     }
 
+
+    /**
+     * @bitrixModuleId sale
+     * @bitrixEventCode OnSaleBasketBeforeSaved
+     * @optionNameRu Перед сохранением корзины
+     * @param $basket
+     * @return Main\EventResult|false
+     */
     public function OnSaleBasketBeforeSavedHadler($basket)
     {
         global $USER;
@@ -1536,6 +1585,13 @@ class Event
         return new Main\EventResult(Main\EventResult::SUCCESS);
     }
 
+    /**
+     * @bitrixModuleId main
+     * @bitrixEventCode OnBeforeUserAdd
+     * @optionNameRu Перед добавлением пользователя
+     * @param $arFields
+     * @return false
+     */
     public function OnBeforeUserAddHandler(&$arFields)
     {
         if (\COption::GetOptionString('mindbox.marketing', 'MODE') == 'standard') {
@@ -1677,6 +1733,13 @@ class Event
         return $arFields;
     }
 
+    /**
+     * @bitrixModuleId main
+     * @bitrixEventCode OnAfterUserAdd
+     * @optionNameRu После добавлением пользователя
+     * @param $arFields
+     * @return false
+     */
     public function OnAfterUserAddHandler(&$arFields)
     {
         $mindBoxId = $_SESSION[ 'NEW_USER_MB_ID' ];
@@ -1762,6 +1825,10 @@ class Event
         return $mindbox;
     }
 
+    /**
+     * @param $id
+     * @return bool
+     */
     private static function isAnonym($id)
     {
         $mindboxId = Helper::getMindboxId($id);
@@ -1774,6 +1841,9 @@ class Event
     }
 
 
+    /**
+     * @param $basketItems
+     */
     private static function setCartMindbox($basketItems)
     {
         $mindbox = static::mindbox();
@@ -1904,6 +1974,10 @@ class Event
         }
     }
 
+    /**
+     * @param $errors
+     * @return string
+     */
     private static function formatValidationMessages($errors)
     {
         Loc::loadMessages(__FILE__);
