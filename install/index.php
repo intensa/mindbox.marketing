@@ -195,7 +195,8 @@ class mindbox_marketing extends CModule {
 			"\Mindbox\Event", "OnSaleOrderBeforeSavedHandler", 1000);
 		$eventManager->registerEventHandlerCompatible("sale", "OnSaleOrderSaved", $this->MODULE_ID,
 			"\Mindbox\Event", "OnSaleOrderSavedHandler", 1000);
-
+		$eventManager->registerEventHandlerCompatible("main", "OnProlog", $this->MODULE_ID,
+			"\Mindbox\Event", "OnPrologHandler", 1000);
 		return true;
 	}
 
