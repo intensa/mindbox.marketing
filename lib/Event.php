@@ -382,6 +382,7 @@ class Event
                 ];
 
                 $isSubscribed = true;
+
                 if ($arFields['UF_MB_IS_SUBSCRIBED'] === '0') {
                     $isSubscribed = false;
                 }
@@ -866,11 +867,19 @@ class Event
      * @bitrixModuleId sale
      * @bitrixEventCode OnSaleOrderSaved
      * @optionNameRu После сохранения заказа
-     * @param $order
+     * @param $event
      * @return Main\EventResult
      */
-    public function OnSaleOrderSavedHandler($order)
+    public function OnSaleOrderSavedHandler($event)
     {
+        $order = $event->getParameter("ENTITY");
+        $oldValues = $event->getParameter("VALUES");
+        $isNew = $event->getParameter("IS_NEW");
+
+        if (!$isNew) {
+            return new Main\EventResult(Main\EventResult::SUCCESS);
+        }
+
         $mindbox = static::mindbox();
         if (!$mindbox) {
             return new Main\EventResult(Main\EventResult::SUCCESS);
@@ -1880,8 +1889,10 @@ class Event
         }
 
         try {
-            $mindbox->productList()->setProductList(new ProductListItemRequestCollection($lines),
-                Options::getOperationName('setProductList'))->sendRequest();
+            $mindbox->productList()->setProductList(
+                new ProductListItemRequestCollection($lines),
+                Options::getOperationName('setProductList')
+            )->sendRequest();
         } catch (Exceptions\MindboxClientErrorException $e) {
         } catch (Exceptions\MindboxClientException $e) {
             $lastResponse = $mindbox->productList()->getLastResponse();
