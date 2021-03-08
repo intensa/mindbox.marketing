@@ -248,9 +248,45 @@ $arAllOptions = array(
         COption::GetOptionString(ADMIN_MODULE_NAME, 'ORDER_MINDBOX_FIELDS', ''),
         ['text']
     ],
-    ['', '', Helper::getAddOrderMatchButton('order_module_button_add'), ['statichtml']]
+    ['', '', Helper::getAddOrderMatchButton('order_module_button_add'), ['statichtml']],
+    getMessage('ORDER_STATUS_SETTINGS'),
+
+    [
+        'ORDER_STATUS_FIELDS_MATCH',
+        '',
+        COption::GetOptionString(ADMIN_MODULE_NAME, 'ORDER_STATUS_FIELDS_MATCH', '{}'),
+        ['text']
+    ],
+    ['', '', Helper::getOrderStatusMatchesTable(), ['statichtml']],
+    [
+        'ORDER_STATUS_BITRIX_LIST',
+        getMessage('ORDER_STATUS_BITRIX_LIST'),
+        COption::GetOptionString(ADMIN_MODULE_NAME, 'ORDER_STATUS_BITRIX_LIST', ''),
+        [
+            'selectbox',
+            Helper::getBitrixOrderStatusList()
+        ]
+    ],
+    [
+        'ORDER_STATUS_MINDBOX_LIST',
+        getMessage('ORDER_STATUS_MINDBOX_LIST'),
+        COption::GetOptionString(ADMIN_MODULE_NAME, 'ORDER_STATUS_MINDBOX_LIST', ''),
+        [
+            'selectbox',
+            Helper::getMindboxOrderStatusList()
+        ]
+    ],
+    [
+        'ORDER_STATUS_MINDBOX_ADDITIONAL',
+        '',
+        COption::GetOptionString(ADMIN_MODULE_NAME, 'ORDER_STATUS_MINDBOX_ADDITIONAL', ''),
+        ['text']
+    ],
+    ['', '', Helper::getAddOrderMatchButton('order_status_module_button_add'), ['statichtml']]
 );
 
+var_dump(COption::getOptionString(ADMIN_MODULE_NAME, 'ORDER_STATUS_FIELDS_MATCH'));
+var_dump(Helper::getBitrixOrderStatusList());
 if (!empty(COption::GetOptionString(ADMIN_MODULE_NAME, 'CATALOG_IBLOCK_ID', ''))) {
     if (YmlFeedMindbox::getIblockInfo(Options::getModuleOption("CATALOG_IBLOCK_ID"))['VERSION'] === '1') {
         $arAllOptions['CATALOG_PROPS_UPGRADE'] = ['note' => getMessage(

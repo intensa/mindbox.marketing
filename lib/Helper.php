@@ -586,4 +586,34 @@ class Helper
 
         return '';
     }
+
+    public static function getBitrixOrderStatusList()
+    {
+        $statusList = [];
+
+        $statusResult = \Bitrix\Sale\Internals\StatusTable::getList([
+            'order' => ['SORT'=>'ASC'],
+            'select' => ['ID'],
+        ]);
+
+        while ($statusItem = $statusResult->fetch()) {
+            $getStatusData = \CSaleStatus::GetByID($statusItem['ID']);
+            $statusList[$statusItem['ID']] = $getStatusData['NAME'] . ' [' . $statusItem['ID'] . ']';
+        }
+
+
+        return $statusList;
+    }
+
+    public static function getMindboxOrderStatusList()
+    {
+        return [
+            'CheckedOut' => 'CheckedOut',
+            'Mindbox-Tech-Cancellation' => 'Mindbox-Tech-Cancellation',
+            'Delivered' => 'Delivered',
+            'Paid' => 'Paid',
+            'Cancelled' => 'Cancelled',
+            'Returned' => 'Returned'
+        ];
+    }
 }

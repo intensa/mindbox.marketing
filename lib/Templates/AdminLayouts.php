@@ -41,6 +41,23 @@ trait AdminLayouts
     /**
      * @return string
      */
+    public static function getOrderStatusMatchesTable()
+    {
+        $styles = self::adminTableStyles();
+        $escapeTable = '</td></tr><tr><td colspan="2"><table class="table order-status-table">';
+        $tableHead = '<tr class="tr title"><th class="th">'.getMessage("BITRIX_FIELDS").'</th><th class="th">'.getMessage("MINDBOX_FIELDS").'</th><th class="th-empty"></th></tr>';
+
+        $result = $styles.$escapeTable.$tableHead;
+
+        $bottomPadding = '</table></td></tr><tr><td>&nbsp;</td></tr>';
+        $result .= $bottomPadding;
+        $result .= self::adminOrderStatusTableScripts();
+        return $result;
+    }
+
+    /**
+     * @return string
+     */
     public static function getAddOrderMatchButton($buttonClass)
     {
         return '<a class="module_button module_button_add '.$buttonClass.'" href="javascript:void(0)">'.getMessage("BUTTON_ADD").'</a>';
@@ -149,13 +166,48 @@ HTML;
     /**
      * @return string
      */
+    public static function adminOrderStatusTableScripts()
+    {
+        return <<<HTML
+            <script>
+                document.addEventListener('DOMContentLoaded', function(){
+                    createTable('order-status-table', 'MINDBOX_ORDER_STATUS_FIELDS_MATCH');
+                    hideInput('[name="MINDBOX_ORDER_STATUS_FIELDS_MATCH"]');
+                    hideInput('[name="MINDBOX_ORDER_STATUS_MINDBOX_ADDITIONAL"]');
+                    let mindboxStatusSelector = document.querySelector('[name="MINDBOX_ORDER_STATUS_MINDBOX_LIST"]');
+                    let mindboxStatusOptions = mindboxStatusSelector.options;
+                    mindboxStatusOptions[mindboxStatusOptions.length] = new Option('Добавить кастомный', 'ADD_CUSTOM');
+                    
+                    mindboxStatusSelector.addEventListener('change', function (e) {
+                      let selectVal = this.value;
+                      if (selectVal === 'ADD_CUSTOM') {
+                        showInput('[name="MINDBOX_ORDER_STATUS_MINDBOX_ADDITIONAL"]');
+                      } else {
+                        document.querySelector('[name="MINDBOX_ORDER_STATUS_MINDBOX_ADDITIONAL"]').value = '';
+                        hideInput('[name="MINDBOX_ORDER_STATUS_MINDBOX_ADDITIONAL"]');
+                      }
+                    });
+                    document.querySelector('.module_button_add.order_status_module_button_add').onclick = () => {addButtonHandler('MINDBOX_ORDER_STATUS_MINDBOX_LIST', 'MINDBOX_ORDER_STATUS_BITRIX_LIST', 'order-status-table', 'MINDBOX_ORDER_STATUS_FIELDS_MATCH', true)};
+                });
+            </script>
+HTML;
+    }
+
+    /**
+     * @return string
+     */
     public static function adminTableScripts()
     {
         return <<<HTML
             <script>                
-                function addButtonHandler(mindboxName, bitrixName, tableClass, propName) {
+                function addButtonHandler(mindboxName, bitrixName, tableClass, propName, useAdditional = false) {
                     let mindboxKey = document.querySelector('[name="'+mindboxName+'"]').value;
                     let bitrixKey = document.querySelector('[name="'+bitrixName+'"]').value;
+                    let additionalMindboxKey = document.querySelector('[name="MINDBOX_ORDER_STATUS_MINDBOX_ADDITIONAL"]').value;
+                    
+                    if (additionalMindboxKey && useAdditional) {
+                       mindboxKey = additionalMindboxKey;
+                    }
                 
                     if (mindboxKey && bitrixKey) {
                         setProps(bitrixKey, mindboxKey, propName);
@@ -170,6 +222,10 @@ HTML;
                 
                 function hideInput(selector) {
                     document.querySelector(selector).style.display = 'none';
+                }
+                
+                function showInput(selector) {
+                    document.querySelector(selector).style.display = 'block';
                 }
                 
                 function addRow(bitrixKey, mindboxKey, tableClass, propName) {

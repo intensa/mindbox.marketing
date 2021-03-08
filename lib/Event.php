@@ -338,6 +338,19 @@ class Event
     }
 
     /**
+     * @bitrixModuleId sale
+     * @bitrixEventCode OnSaleStatusOrder
+     * @optionNameRu После изменения статуса заказа
+     * @param $orderId
+     * @param $statusCode
+     * @return bool
+     */
+    public function OnSaleStatusOrderHandler($orderId, $statusCode)
+    {
+        
+    }
+
+    /**
      * @bitrixModuleId main
      * @bitrixEventCode OnAfterUserRegister
      * @optionNameRu После регистрации пользователя
