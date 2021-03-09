@@ -363,6 +363,12 @@ class Event
                     ]
                 ])
             );
+
+            try {
+                $response = $request->sendRequest();
+            } catch (Exceptions\MindboxClientException $e) {
+                return false;
+            }
         }
     }
 
