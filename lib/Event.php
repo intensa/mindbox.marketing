@@ -347,7 +347,23 @@ class Event
      */
     public function OnSaleStatusOrderHandler($orderId, $statusCode)
     {
-        
+        $mindboxStatusCode = Helper::getMindboxStatusByShopStatus($statusCode);
+        $mindbox = static::mindbox();
+
+        if ($mindbox && $mindboxStatusCode !== false) {
+            $request = $mindbox->getClientV3()->prepareRequest(
+                'POST',
+                Options::getOperationName('updateOrderStatus'),
+                new DTO([
+                    'orderLinesStatus' => $mindboxStatusCode,
+                    'order' => [
+                        'ids' => [
+                            'websiteId' => $orderId
+                        ]
+                    ]
+                ])
+            );
+        }
     }
 
     /**

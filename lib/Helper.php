@@ -616,4 +616,17 @@ class Helper
             'Returned' => 'Returned'
         ];
     }
+
+    public static function getMindboxStatusByShopStatus($shopStatus)
+    {
+        $return = false;
+        $statusOptionsJson = COption::GetOptionString(ADMIN_MODULE_NAME, 'ORDER_STATUS_FIELDS_MATCH', '{}');
+        $statusOptionsData = json_decode($statusOptionsJson, true);
+
+        if (array_key_exists($shopStatus, $statusOptionsData)) {
+            $return = $statusOptionsData[$shopStatus];
+        }
+
+        return $return;
+    }
 }
