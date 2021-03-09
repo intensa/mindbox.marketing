@@ -354,9 +354,10 @@ class Event
         }
 
         $mindboxStatusCode = Helper::getMindboxStatusByShopStatus($statusCode);
+
         $mindbox = static::mindbox();
         $logger->log('$mindboxStatusCode', $mindboxStatusCode);
-
+        $mindboxStatusCode = 'Paid';
         if ($mindbox && $mindboxStatusCode !== false) {
             $request = $mindbox->getClientV3()->prepareRequest(
                 'POST',
