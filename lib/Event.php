@@ -350,6 +350,7 @@ class Event
         if (\CModule::IncludeModule('intensa.logger')) {
             $logger = new \Intensa\Logger\ILog('orderStatus');
             $logger->log('order', $orderId);
+            $logger->log('$statusCode', $statusCode);
         }
 
         $mindboxStatusCode = Helper::getMindboxStatusByShopStatus($statusCode);
