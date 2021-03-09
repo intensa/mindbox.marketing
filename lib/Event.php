@@ -361,7 +361,7 @@ class Event
         if ($mindbox && $mindboxStatusCode !== false) {
             $request = $mindbox->getClientV3()->prepareRequest(
                 'POST',
-               'Website.UpdateOrderStatus',
+                Options::getOperationName('updateOrderStatus'),
                 new DTO([
                     'orderLinesStatus' => $mindboxStatusCode,
                     'order' => [
