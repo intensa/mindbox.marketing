@@ -1616,7 +1616,12 @@ class Event
 
         return new Main\EventResult(Main\EventResult::SUCCESS);
     }
-
+    /**
+     * @bitrixModuleId sale
+     * @bitrixEventCode OnSaleBasketItemRefreshData
+     * @optionNameRu Обновление избранного
+     * @param $event
+     */
     public function OnSaleBasketItemRefreshDataHandler($event)
     {
         $basketItem = $event;
@@ -1861,6 +1866,11 @@ class Event
         }
     }
 
+    /**
+     * @bitrixModuleId main
+     * @bitrixEventCode OnProlog
+     * @optionNameRu Вызов пролога
+     */
     public function OnPrologHandler()
     {
         $defaultOptions = \Bitrix\Main\Config\Option::getDefaults("mindbox.marketing");
