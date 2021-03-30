@@ -345,10 +345,10 @@ class Event
      * @param $statusCode
      * @return bool
      */
-    public function OnSaleStatusOrderHandler($event)
+    public function OnSaleStatusOrderHandler(Main\Event $event)
     {
         if (\CModule::IncludeModule('intensa.logger')) {
-            $logger = new \Intensa\Logger\ILog('orderStatus_new');
+            $logger = new \Intensa\Logger\ILog('orderStatus_new_2');
             $logger->log('ev', $event);
         }
 
