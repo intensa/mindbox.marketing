@@ -339,19 +339,27 @@ class Event
 
     /**
      * @bitrixModuleId sale
-     * @bitrixEventCode OnStatusUpdate
+     * @bitrixEventCode OnSaleOrderEntitySaved
      * @optionNameRu После изменения статуса заказа
      * @param $orderId
      * @param $statusCode
      * @return bool
      */
-    public function OnSaleStatusOrderHandler($orderId, $statusCode)
+    public function OnSaleStatusOrderHandler(Bitrix\Main\Event $event)
     {
         if (\CModule::IncludeModule('intensa.logger')) {
-            $logger = new \Intensa\Logger\ILog('orderStatus');
-            $logger->log('order', $orderId);
-            $logger->log('$statusCode', $statusCode);
+            $logger = new \Intensa\Logger\ILog('orderStatus_new');
+
         }
+
+        $arEmailFields = array();
+        $order = $event->getParameter("ENTITY");
+        $oldValues = $event->getParameter("VALUES");
+        $arOrderVals = $order->getFields()->getValues();
+        $logger->log('order', $oldValues);
+        $logger->log('$statusCode', $arOrderVals);
+
+        return false;
 
         $mindboxStatusCode = Helper::getMindboxStatusByShopStatus($statusCode);
 
