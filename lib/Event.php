@@ -345,7 +345,7 @@ class Event
      * @param $statusCode
      * @return bool
      */
-    public function OnSaleStatusOrderHandler(Bitrix\Main\Event $event)
+    public function OnSaleStatusOrderHandler(Bitrix\Main\Event $event, $array)
     {
         if (\CModule::IncludeModule('intensa.logger')) {
             $logger = new \Intensa\Logger\ILog('orderStatus_new');
