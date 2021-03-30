@@ -345,11 +345,11 @@ class Event
      * @param $statusCode
      * @return bool
      */
-    public function OnSaleStatusOrderHandler(Bitrix\Main\Event $event, $array)
+    public function OnSaleStatusOrderHandler($event)
     {
         if (\CModule::IncludeModule('intensa.logger')) {
             $logger = new \Intensa\Logger\ILog('orderStatus_new');
-
+            $logger->log('ev', $event);
         }
 
         $arEmailFields = array();
