@@ -339,7 +339,7 @@ class Event
 
     /**
      * @bitrixModuleId sale
-     * @bitrixEventCode OnSaleOrderEntitySaved
+     * @bitrixEventCode OnSaleOrderSaved
      * @optionNameRu После изменения статуса заказа
      * @param $orderId
      * @param $statusCode
