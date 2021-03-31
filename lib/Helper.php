@@ -632,7 +632,7 @@ class Helper
         \Bitrix\Main\Loader::includeModule("catalog");
 
         $arDiscount = [];
-        $arProductPrices = self::getProductPrices($basketItem);
+        $arProductPrices = self::getProductPrices($basketItem->getProductId());
         $allProductPrices = $arProductPrices['PRICES'];
         $basePriceGroupId = $arProductPrices['BASE_PRICE_CATALOG_GROUP_ID'];
 
