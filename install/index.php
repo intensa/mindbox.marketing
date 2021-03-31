@@ -1,4 +1,5 @@
 <?php
+
 use Bitrix\Main\Application;
 use Bitrix\Main\Config\Option;
 use \Bitrix\Main\Loader;
@@ -6,8 +7,6 @@ use \Bitrix\Main\Entity\Base;
 use \Bitrix\Main\Type\DateTime;
 
 IncludeModuleLangFile(__FILE__);
-
-include __DIR__ . "/../lib/SaleActionDiscountFromDirectory.php";
 
 class mindbox_marketing extends CModule
 {
@@ -227,10 +226,10 @@ class mindbox_marketing extends CModule
         );
         $eventManager->registerEventHandlerCompatible(
             "sale",
-            "OnBeforeSaleOrderFinalAction",
+            "OnSaleBasketBeforeSaved",
             $this->MODULE_ID,
             "\Mindbox\Event",
-            "OnBeforeSaleOrderFinalActionHandler",
+            "OnSaleBasketBeforeSavedHandler",
             1000
         );
         $eventManager->registerEventHandlerCompatible(
@@ -257,7 +256,6 @@ class mindbox_marketing extends CModule
             "OnPrologHandler",
             1000
         );
-
         return true;
     }
 
@@ -274,12 +272,13 @@ class mindbox_marketing extends CModule
         $eventManager->unRegisterEventHandler("main", "OnBeforeUserUpdate", $this->MODULE_ID, "\Mindbox\Event", "OnBeforeUserUpdateHandler");
         $eventManager->unRegisterEventHandler("main", "OnBeforeUserAdd", $this->MODULE_ID, "\Mindbox\Event", "OnBeforeUserAddHandler");
         $eventManager->unRegisterEventHandler("main", "OnAfterUserAdd", $this->MODULE_ID, "\Mindbox\Event", "OnAfterUserAddHandler");
-        $eventManager->unRegisterEventHandler("sale", "OnBeforeSaleOrderFinalAction", $this->MODULE_ID, "\Mindbox\Event", "OnBeforeSaleOrderFinalActionHandler");
+        $eventManager->unRegisterEventHandler("sale", "OnSaleBasketBeforeSaved", $this->MODULE_ID, "\Mindbox\Event", "OnSaleBasketBeforeSavedHandler");
         $eventManager->unRegisterEventHandler("sale", "OnSaleOrderBeforeSaved", $this->MODULE_ID, "\Mindbox\Event", "OnSaleOrderBeforeSavedHandler");
         $eventManager->unRegisterEventHandler("sale", "OnSaleOrderSaved", $this->MODULE_ID, "\Mindbox\Event", "OnSaleOrderSavedHandler");
         $eventManager->unRegisterEventHandler("main", "OnProlog", $this->MODULE_ID, "\Mindbox\Event", "OnPrologHandler");
         return true;
     }
+
 
     function InstallFiles()
     {
