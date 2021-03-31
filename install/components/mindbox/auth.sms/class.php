@@ -39,8 +39,7 @@ class AuthSms extends CBitrixComponent implements Controllerable
                 return;
             }
         } catch (LoaderException $e) {
-            ShowError(GetMessage('MB_AUS_MODULE_NOT_INCLUDED', ['#MODULE#' => 'mindbox.marketing']));
-            ;
+            ShowError(GetMessage('MB_AUS_MODULE_NOT_INCLUDED', ['#MODULE#' => 'mindbox.marketing']));;
             return;
         }
 
@@ -62,10 +61,8 @@ class AuthSms extends CBitrixComponent implements Controllerable
         $this->user->setMobilePhone(Helper::formatPhone($phone));
 
         try {
-            $response = $this->mindbox->customer()->sendAuthorizationCode(
-                $this->user,
-                Options::getOperationName('sendAuthorizationCode')
-            )->sendRequest();
+            $response = $this->mindbox->customer()->sendAuthorizationCode($this->user,
+                Options::getOperationName('sendAuthorizationCode'))->sendRequest();
         } catch (MindboxClientException $e) {
             return Ajax::errorResponse(GetMessage('MB_AUS_AUTH_UNAVAILABLE'));
         }
@@ -97,10 +94,8 @@ class AuthSms extends CBitrixComponent implements Controllerable
         $this->user->setMobilePhone(Helper::formatPhone($phone));
 
         try {
-            $this->mindbox->customer()->sendAuthorizationCode(
-                $this->user,
-                Options::getOperationName('sendAuthorizationCode')
-            )->sendRequest();
+            $this->mindbox->customer()->sendAuthorizationCode($this->user,
+                Options::getOperationName('sendAuthorizationCode'))->sendRequest();
         } catch (MindboxClientException $e) {
             return Ajax::errorResponse($e);
         }
@@ -127,11 +122,8 @@ class AuthSms extends CBitrixComponent implements Controllerable
 
         $customerDto = new CustomerRequestDTO(['mobilePhone' => $phone]);
         try {
-            $checkCodeResponse = $this->mindbox->customer()->checkAuthorizationCode(
-                $customerDto,
-                $code,
-                Options::getOperationName('checkAuthorizationCode')
-            )->sendRequest();
+            $checkCodeResponse = $this->mindbox->customer()->checkAuthorizationCode($customerDto, $code,
+                Options::getOperationName('checkAuthorizationCode'))->sendRequest();
 
             $validationErrors = $checkCodeResponse->getValidationErrors();
             if (!empty($validationErrors)) {
@@ -140,46 +132,25 @@ class AuthSms extends CBitrixComponent implements Controllerable
 
             $user = $checkCodeResponse->getResult()->getCustomer();
 
-            if ($user->getProcessingStatus() !== 'Found') {
+            if($user->getProcessingStatus() !== 'Found') {
                 return Ajax::errorResponse(GetMessage('MB_AUS_USER_NOT_FOUND'));
             }
 
-            $arFilter = [
-                [
-                    "LOGIC"=>"OR",
-                    [
-                        'UF_MINDBOX_ID' => $user->getId('mindboxId')
-                    ],
-                    [
-                        "PERSONAL_PHONE"    =>  $user->getField('mobilePhone')
-                    ],
-                    [
-                        'PERSONAL_MOBILE'   =>  $user->getField('mobilePhone')
-                    ],
-                    [
-                        'EMAIL' =>  $user->getField('email')
-                    ]
-                ]
-            ];
             $dbUser = Bitrix\Main\UserTable::getList(
                 [
-                    'filter' => $arFilter
+                    'filter' => [
+                        'UF_MINDBOX_ID' => $user->getId('mindboxId')
+                    ]
                 ]
             );
             if ($bxUser = $dbUser->fetch()) {
-                $fields = [
-                    'UF_MINDBOX_ID'      => $user->getId('mindboxId')
-                ];
-                $user = new \CUser;
-                $user->Update(
-                    $bxUser['ID'],
-                    $fields
-                );
                 $USER->Authorize($bxUser['ID']);
+
                 return [
                     'type' => 'success',
                     'message' => GetMessage('MB_AUS_SUCCESS')
                 ];
+
             } else {
                 $_SESSION['NEW_USER_MB_ID'] = $user->getId('mindboxId');
                 $firstName = $user->getField('firstName');
@@ -192,7 +163,7 @@ class AuthSms extends CBitrixComponent implements Controllerable
                 $birthDate = $user->getField('birthDate');
                 $sex = $user->getField('sex');
 
-                if (empty($email)) {
+                if(empty($email)) {
                     $email = $mobilePhone . '@no-reply.com';
                 }
 
@@ -235,7 +206,7 @@ class AuthSms extends CBitrixComponent implements Controllerable
         }
         global $USER;
         
-        foreach ($fields as $key => $value) {
+        foreach($fields as $key => $value) {
             $fields[$key] = htmlspecialcharsEx(trim($value));
         }
 
@@ -266,10 +237,8 @@ class AuthSms extends CBitrixComponent implements Controllerable
         $customer->setId('mindboxId', $_SESSION['NEW_USER_MB_ID']);
 
         try {
-            $registerResponse = $this->mindbox->customer()->fill(
-                $customer,
-                Options::getOperationName('fill')
-            )->sendRequest();
+            $registerResponse = $this->mindbox->customer()->fill($customer,
+                Options::getOperationName('fill'))->sendRequest();
         } catch (MindboxClientException $e) {
             return Ajax::errorResponse($e);
         }
