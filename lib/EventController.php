@@ -74,14 +74,15 @@ class EventController
                     !empty($methodDocsParams)
                     && array_key_exists($this->bitrixEventCode, $methodDocsParams)
                 ) {
-                      $eventList[$methodDocsParams[$this->bitrixEventCode]] = [
-                          'bitrixModule' => $methodDocsParams[$this->bitrixModuleCode],
-                          'bitrixEvent' => $methodDocsParams[$this->bitrixEventCode],
-                          'method' => $method->getName(),
-                          'class' => $fullClassName,
-                          'name_ru' => $methodDocsParams[$this->russianNameCode],
-                          'name_en' => $methodDocsParams[$this->russianNameCode],
-                      ];
+                    $eventCode = $methodDocsParams[$this->bitrixEventCode] . ':' . $method->getName();
+                    $eventList[$eventCode] = [
+                        'bitrixModule' => $methodDocsParams[$this->bitrixModuleCode],
+                        'bitrixEvent' => $methodDocsParams[$this->bitrixEventCode],
+                        'method' => $method->getName(),
+                        'class' => $fullClassName,
+                        'name_ru' => $methodDocsParams[$this->russianNameCode],
+                        'name_en' => $methodDocsParams[$this->russianNameCode],
+                    ];
                 }
 
             }
@@ -102,8 +103,8 @@ class EventController
         $listEvents = $self->getModuleEvents();
 
         if (!empty($listEvents) && is_array($listEvents)) {
-            foreach ($listEvents as $item) {
-                $return[$item['bitrixEvent']] = ($lang === 'en') ? $item['name_en'] : $item['name_ru'];
+            foreach ($listEvents as $code => $item) {
+                $return[$code] = ($lang === 'en') ? $item['name_en'] : $item['name_ru'];
             }
         }
 
@@ -165,9 +166,9 @@ class EventController
         }
 
         if (!empty($return)) {
-           foreach ($return as &$item) {
-               $item = str_replace(["\r\n", "\r", "\n", PHP_EOL], '', trim($item));
-           }
+            foreach ($return as &$item) {
+                $item = str_replace(["\r\n", "\r", "\n", PHP_EOL], '', trim($item));
+            }
         }
 
         return $return;
@@ -247,8 +248,7 @@ class EventController
             if (!empty($moduleEventData)) {
                 if (!in_array($eventCode, $activeEventList) && $value !== false) {
                     $this->unRegisterEventHandler($moduleEventData);
-                }
-                elseif (in_array($eventCode, $activeEventList) && $value === false) {
+                } elseif (in_array($eventCode, $activeEventList) && $value === false) {
                     $this->registerEventHandler($moduleEventData);
                 }
             }
@@ -298,7 +298,7 @@ class EventController
      */
     public function setOptionAfterRegisterHandlers($stringValue)
     {
-      \COption::SetOptionString(ADMIN_MODULE_NAME, self::getOptionEventCode(), $stringValue);
+        \COption::SetOptionString(ADMIN_MODULE_NAME, self::getOptionEventCode(), $stringValue);
     }
 
     /**
