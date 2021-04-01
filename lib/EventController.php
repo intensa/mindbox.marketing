@@ -3,6 +3,7 @@
 
 namespace Mindbox;
 
+defined('ADMIN_MODULE_NAME') or define('ADMIN_MODULE_NAME', 'mindbox.marketing');
 /**
  * Class EventController
  * @package Mindbox
@@ -224,10 +225,30 @@ class EventController
         ];
     }
 
+    protected function getCartRulesHandlerData()
+    {
+        return [
+            'bitrixModule' => 'sale',
+            'bitrixEvent' => 'OnCondSaleActionsControlBuildList',
+            'class' => '\Mindbox\ExtensionCartRulesActions',
+            'method' => 'GetControlDescr'
+        ];
+    }
+
+    protected function installCartRulesHandler()
+    {
+        $this->registerEventHandler($this->getCartRulesHandlerData());
+    }
+
+    protected function unInstallCartRulesHandler()
+    {
+        $this->unRegisterEventHandler($this->getCartRulesHandlerData());
+    }
+
     /**
      * Регистрация обработчика, ответствененного за изменения активности обработчиков
      */
-    public function installEventControllerHandler()
+    protected function installEventControllerHandler()
     {
         $this->registerEventHandler($this->getEventControllerHandlerData());
     }
@@ -235,7 +256,7 @@ class EventController
     /**
      * Удаление обработчика, ответствененного за изменения активности обработчиков
      */
-    public function unInstallEventControllerHandler()
+    protected function unInstallEventControllerHandler()
     {
         $this->unRegisterEventHandler($this->getEventControllerHandlerData());
     }
@@ -281,6 +302,7 @@ class EventController
         }
 
         $this->installEventControllerHandler();
+        $this->installCartRulesHandler();
     }
 
     /**
@@ -295,6 +317,7 @@ class EventController
         }
 
         $this->unInstallEventControllerHandler();
+        $this->unInstallCartRulesHandler();
         $this->setOptionAfterRegisterHandlers('');
     }
 

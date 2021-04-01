@@ -44,7 +44,7 @@ class mindbox_marketing extends CModule
             $this->MODULE_NAME = $arModuleVersion["MODULE_NAME"];
             $this->MODULE_DESCRIPTION = $arModuleVersion["MODULE_DESCRIPTION"];
         } else {
-            $this->MODULE_VERSION = "0.0.1";
+            $this->MODULE_VERSION = "2.3.0";
             $this->MODULE_VERSION_DATE = "1970-01-01 00:00:00";
             $this->MODULE_NAME = "mindbox";
             $this->MODULE_DESCRIPTION = "ModuleDescription";
