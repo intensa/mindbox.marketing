@@ -287,5 +287,4 @@ HTML;
             </script>
 HTML;
     }
-
 }

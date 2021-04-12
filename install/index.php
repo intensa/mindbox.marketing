@@ -1,4 +1,4 @@
-<?
+<?php
 require  __DIR__ . '/../include.php';
 
 use Bitrix\Main\Application;
@@ -24,8 +24,7 @@ class mindbox_marketing extends CModule
     private $userFields = [
         "UF_MINDBOX_ID",
         "UF_PHONE_CONFIRMED",
-        "UF_EMAIL_CONFIRMED",
-        "UF_IS_SUBSCRIBED"
+        "UF_EMAIL_CONFIRMED"
     ];
 
     function mindbox_marketing()
@@ -193,7 +192,6 @@ class mindbox_marketing extends CModule
 		return true;
 	}
 
-
     function InstallFiles()
     {
         mkdir($_SERVER["DOCUMENT_ROOT"] . "/bitrix/js/mindbox");
@@ -295,39 +293,6 @@ class mindbox_marketing extends CModule
             "LIST_FILTER_LABEL" => [
                 "ru" => "Mindbox ID",
                 "en" => "Mindbox ID",
-            ],
-        ];
-
-        if (empty($existFields[$aUserFields['FIELD_NAME']]) && !$oUserTypeEntity->Add($aUserFields)) {
-            return false;
-        }
-
-        $aUserFields = [
-            "ENTITY_ID" => "USER",
-            "FIELD_NAME" => "UF_IS_SUBSCRIBED",
-            "USER_TYPE_ID" => "boolean",
-            "XML_ID" => "IS_SUBSCRIBED",
-            "SORT" => 500,
-            "MULTIPLE" => "N",
-            "MANDATORY" => "N",
-            "SHOW_FILTER" => "N",
-            "SHOW_IN_LIST" => "",
-            "EDIT_IN_LIST" => "",
-            "IS_SEARCHABLE" => "N",
-            "SETTINGS" => [
-                "DEFAULT_VALUE" => "N",
-            ],
-            "EDIT_FORM_LABEL" => [
-                "ru" => "Получать сообщения об акциях, скидках и новостях",
-                "en" => "Receive messages about promotions, discounts and news",
-            ],
-            "LIST_COLUMN_LABEL" => [
-                "ru" => "Получать сообщения об акциях, скидках и новостях",
-                "en" => "Receive messages about promotions, discounts and news",
-            ],
-            "LIST_FILTER_LABEL" => [
-                "ru" => "Получать сообщения об акциях, скидках и новостях",
-                "en" => "Receive messages about promotions, discounts and news",
             ],
         ];
 

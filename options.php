@@ -25,7 +25,7 @@ function ShowParamsHTMLByarray($arParams)
     }
 }
 
-$mayEmptyProps = ['MINDBOX_CATALOG_PROPS', 'MINDBOX_CATALOG_OFFER_PROPS'];
+$mayEmptyProps = ['MINDBOX_CATALOG_PROPS', 'MINDBOX_CATALOG_OFFER_PROPS', 'MINDBOX_ENABLE_EVENT_LIST'];
 
 if (isset($_REQUEST['save']) && check_bitrix_sessid()) {
     if (empty($_POST['MINDBOX_PROTOCOL']) || $_POST['MINDBOX_PROTOCOL'] !== 'Y') {
@@ -124,6 +124,18 @@ $arAllOptions = array(
         getMessage('SYSTEM_NAME'),
         COption::GetOptionString(ADMIN_MODULE_NAME, 'SYSTEM_NAME', ''),
         ['text']
+    ],
+    [
+        'API_DOMAIN',
+        getMessage('API_DOMAIN'),
+        COption::GetOptionString(ADMIN_MODULE_NAME, 'API_DOMAIN', 'ru'),
+        [
+            'selectbox',
+            [
+                'ru' => 'api.mindbox.ru',
+                'cloud'   =>  'api.mindbox.cloud',
+            ]
+        ]
     ],
     getMessage('CONNECTION_SETTINGS'),
     [

@@ -50,11 +50,7 @@ class Options
         'viewCategory' => 'ViewCategory',
         'commitOrderTransaction'    =>  'CommitOrderTransaction',
         'rollbackOrderTransaction'  =>  'RollbackOrderTransaction',
-        'saveOfflineOrder'          =>  'SaveOfflineOrder',
-        'setWishList'   =>  'SetWishList',
-        'clearWishList' =>  'ClearWishList',
-        'clearCart' =>  'ClearCart',
-        'updateOrderStatus' => 'UpdateOrderStatus',
+        'saveOfflineOrder'          =>  'SaveOfflineOrder'
     ];
 
     private static $sdkOptions = [
@@ -81,7 +77,12 @@ class Options
         }
 
         // for standard mode
-        $sdkOptions['domain'] = COption::GetOptionString('mindbox.marketing', 'SYSTEM_NAME') .  '-services.mindbox.ru';
+        $domain = COption::GetOptionString('mindbox.marketing', 'SYSTEM_NAME') .  '-services.mindbox.';
+
+        $domainZone = COption::GetOptionString('mindbox.marketing', 'API_DOMAIN', 'ru');
+
+        $sdkOptions['domainZone'] = $domainZone;
+        $sdkOptions['domain'] = $domain.$domainZone;
 
         return $sdkOptions;
     }
@@ -89,7 +90,6 @@ class Options
     public static function getConfig($queue = false)
     {
         $config = static::getSDKOptions();
-
         if ($queue) {
             $config['timeout'] = COption::GetOptionString('mindbox.marketing', 'QUEUE_TIMEOUT', 30);
         }

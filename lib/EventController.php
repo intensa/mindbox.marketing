@@ -3,7 +3,7 @@
 
 namespace Mindbox;
 
-
+defined('ADMIN_MODULE_NAME') or define('ADMIN_MODULE_NAME', 'mindbox.marketing');
 /**
  * Class EventController
  * @package Mindbox
@@ -14,6 +14,10 @@ class EventController
      * @var string
      */
     protected $bitrixEventCode = 'bitrixEventCode';
+    /**
+     * @var string
+     */
+    protected $notCompatibleCode = 'notCompatible';
     /**
      * @var string
      */
@@ -70,21 +74,19 @@ class EventController
                 $methodComments = $method->getDocComment();
                 $methodDocsParams = $this->prepareDocsBlockParams($methodComments);
 
-                if (
-                    !empty($methodDocsParams)
+                if (!empty($methodDocsParams)
                     && array_key_exists($this->bitrixEventCode, $methodDocsParams)
                 ) {
-                    $eventCode = $methodDocsParams[$this->bitrixEventCode] . ':' . $method->getName();
-                    $eventList[$eventCode] = [
+                    $eventList[$methodDocsParams[$this->bitrixEventCode]] = [
                         'bitrixModule' => $methodDocsParams[$this->bitrixModuleCode],
                         'bitrixEvent' => $methodDocsParams[$this->bitrixEventCode],
+                        'notCompatible' => $methodDocsParams[$this->notCompatibleCode],
                         'method' => $method->getName(),
                         'class' => $fullClassName,
                         'name_ru' => $methodDocsParams[$this->russianNameCode],
                         'name_en' => $methodDocsParams[$this->russianNameCode],
                     ];
                 }
-
             }
         }
 
@@ -103,8 +105,8 @@ class EventController
         $listEvents = $self->getModuleEvents();
 
         if (!empty($listEvents) && is_array($listEvents)) {
-            foreach ($listEvents as $code => $item) {
-                $return[$code] = ($lang === 'en') ? $item['name_en'] : $item['name_ru'];
+            foreach ($listEvents as $item) {
+                $return[$item['bitrixEvent']] = ($lang === 'en') ? $item['name_en'] : $item['name_ru'];
             }
         }
 
@@ -140,7 +142,6 @@ class EventController
         $eventHandlers = $this->eventManager->findEventHandlers($moduleId, $eventId);
 
         if (!empty($eventHandlers) && is_array($eventHandlers)) {
-
             foreach ($eventHandlers as $handler) {
                 if ($handler['TO_MODULE_ID'] === ADMIN_MODULE_NAME) {
                     $return = $handler;
@@ -153,7 +154,7 @@ class EventController
     }
 
     /**
-     * Обработка док-блока. Метод вытаскивает данные из параметров в комментарии.
+     * Метод получает данные их комментариев к методу
      * @param $stirng
      * @return array
      */
@@ -180,7 +181,13 @@ class EventController
      */
     protected function registerEventHandler($params)
     {
-        $this->eventManager->registerEventHandlerCompatible(
+        $method = 'registerEventHandlerCompatible';
+
+        if ($params['notCompatible']) {
+            $method = 'registerEventHandler';
+        }
+
+        $this->eventManager->{$method}(
             $params['bitrixModule'],
             $params['bitrixEvent'],
             ADMIN_MODULE_NAME,
@@ -218,10 +225,30 @@ class EventController
         ];
     }
 
+    protected function getCartRulesHandlerData()
+    {
+        return [
+            'bitrixModule' => 'sale',
+            'bitrixEvent' => 'OnCondSaleActionsControlBuildList',
+            'class' => '\Mindbox\ExtensionCartRulesActions',
+            'method' => 'GetControlDescr'
+        ];
+    }
+
+    protected function installCartRulesHandler()
+    {
+        $this->registerEventHandler($this->getCartRulesHandlerData());
+    }
+
+    protected function unInstallCartRulesHandler()
+    {
+        $this->unRegisterEventHandler($this->getCartRulesHandlerData());
+    }
+
     /**
      * Регистрация обработчика, ответствененного за изменения активности обработчиков
      */
-    public function installEventControllerHandler()
+    protected function installEventControllerHandler()
     {
         $this->registerEventHandler($this->getEventControllerHandlerData());
     }
@@ -229,7 +256,7 @@ class EventController
     /**
      * Удаление обработчика, ответствененного за изменения активности обработчиков
      */
-    public function unInstallEventControllerHandler()
+    protected function unInstallEventControllerHandler()
     {
         $this->unRegisterEventHandler($this->getEventControllerHandlerData());
     }
@@ -275,6 +302,7 @@ class EventController
         }
 
         $this->installEventControllerHandler();
+        $this->installCartRulesHandler();
     }
 
     /**
@@ -289,6 +317,7 @@ class EventController
         }
 
         $this->unInstallEventControllerHandler();
+        $this->unInstallCartRulesHandler();
         $this->setOptionAfterRegisterHandlers('');
     }
 

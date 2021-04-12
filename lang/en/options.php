@@ -40,3 +40,4 @@ $MESS['SYSTEM_NAME'] = "System name";
 $MESS['LOYALTY'] = 'Loyality';
 $MESS['SAVE'] = 'Save';
 $MESS['CLIENTS'] = 'Clients settings';
+$MESS['API_DOMAIN'] = 'API Domain';
