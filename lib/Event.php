@@ -339,33 +339,46 @@ class Event
 
     /**
      * @bitrixModuleId sale
-     * @bitrixEventCode OnSaleOrderSaved
-     * @optionNameRu После изменения статуса заказа
-     * @param $orderId
-     * @param $statusCode
+     * @bitrixEventCode OnBeforeSaleShipmentSetField
+     * @optionNameRu Изменение статуса отгрузки
+     * @notCompatible true
+     * @param Main\Event $event
      * @return bool
      */
-    public function OnSaleStatusOrderHandler(Main\Event $event)
+    public function OnBeforeSaleShipmentSetFieldHandler(Main\Event $event)
+    {
+
+        $order = $event->getParameter('ENTITY');
+        $orderId = $order->getField('ORDER_ID');
+        $statusValue = $event->getParameter('VALUE');
+
+        if ($event->getParameter('NAME') === 'STATUS_ID') {
+            self::tempHelperOrderStatus($orderId, $statusValue);
+        }
+    }
+
+    /**
+     * @bitrixModuleId sale
+     * @bitrixEventCode OnSaleStatusOrder
+     * @optionNameRu Изменение статуса заказа
+     * @param Main\Event $event
+     * @return bool
+     */
+    public function OnSaleStatusOrderHandler($orderId, $orderFields)
+    {
+        self::tempHelperOrderStatus($orderId, $orderFields);
+    }
+
+    public static function tempHelperOrderStatus($orderId, $statusCode)
     {
         if (\CModule::IncludeModule('intensa.logger')) {
-            $logger = new \Intensa\Logger\ILog('orderStatus_new_2');
-            $logger->log('ev', $event);
+            $logger = new \Intensa\Logger\ILog('tempHelperOrderStatus');
         }
-
-        $arEmailFields = array();
-        $order = $event->getParameter("ENTITY");
-        $oldValues = $event->getParameter("VALUES");
-        $arOrderVals = $order->getFields()->getValues();
-        $logger->log('order', $oldValues);
-        $logger->log('$statusCode', $arOrderVals);
-
-        return false;
-
         $mindboxStatusCode = Helper::getMindboxStatusByShopStatus($statusCode);
-
         $mindbox = static::mindbox();
         $logger->log('$mindboxStatusCode', $mindboxStatusCode);
         $mindboxStatusCode = 'Paid';
+
         if ($mindbox && $mindboxStatusCode !== false) {
             $request = $mindbox->getClientV3()->prepareRequest(
                 'POST',
