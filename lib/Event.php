@@ -347,13 +347,12 @@ class Event
      */
     public function OnBeforeSaleShipmentSetFieldHandler(Main\Event $event)
     {
-
-        $order = $event->getParameter('ENTITY');
-        $orderId = $order->getField('ORDER_ID');
+        $orderEntity = $event->getParameter('ENTITY');
+        $orderId = $orderEntity->getField('ORDER_ID');
         $statusValue = $event->getParameter('VALUE');
 
         if ($event->getParameter('NAME') === 'STATUS_ID') {
-            self::tempHelperOrderStatus($orderId, $statusValue);
+            Helper::updateOrderStatus($orderId, $statusValue);
         }
     }
 
@@ -366,41 +365,7 @@ class Event
      */
     public function OnSaleStatusOrderHandler($orderId, $orderFields)
     {
-        self::tempHelperOrderStatus($orderId, $orderFields);
-    }
-
-    public static function tempHelperOrderStatus($orderId, $statusCode)
-    {
-        if (\CModule::IncludeModule('intensa.logger')) {
-            $logger = new \Intensa\Logger\ILog('tempHelperOrderStatus');
-        }
-        $mindboxStatusCode = Helper::getMindboxStatusByShopStatus($statusCode);
-        $mindbox = static::mindbox();
-        $logger->log('$mindboxStatusCode', $mindboxStatusCode);
-        $mindboxStatusCode = 'Paid';
-
-        if ($mindbox && $mindboxStatusCode !== false) {
-            $request = $mindbox->getClientV3()->prepareRequest(
-                'POST',
-                Options::getOperationName('updateOrderStatus'),
-                new DTO([
-                    'orderLinesStatus' => $mindboxStatusCode,
-                    'order' => [
-                        'ids' => [
-                            'websiteId' => $orderId
-                        ]
-                    ]
-                ])
-            );
-
-            try {
-                $response = $request->sendRequest();
-                $logger->log('$response', $response);
-            } catch (Exceptions\MindboxClientException $e) {
-                $logger->log('error', $e->getMessage());
-                return false;
-            }
-        }
+        Helper::updateOrderStatus($orderId, $orderFields);
     }
 
     /**

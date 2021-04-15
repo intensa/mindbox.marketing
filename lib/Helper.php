@@ -46,6 +46,38 @@ class Helper
         return $ending;
     }
 
+    public static function updateOrderStatus($orderId, $statusCode)
+    {
+        $mindbox = Options::getConfig();
+
+        if ($mindbox) {
+            $mindboxStatusCode = Helper::getMindboxStatusByShopStatus($statusCode);
+
+            if ($mindboxStatusCode !== false) {
+                $request = $mindbox->getClientV3()->prepareRequest(
+                    'POST',
+                    Options::getOperationName('updateOrderStatus'),
+                    new DTO([
+                        'orderLinesStatus' => $mindboxStatusCode,
+                        'order' => [
+                            'ids' => [
+                                'websiteId' => $orderId
+                            ]
+                        ]
+                    ])
+                );
+
+                try {
+                    $response = $request->sendRequest();
+                } catch (Exceptions\MindboxClientException $e) {
+                    return false;
+                }
+            }
+        }
+
+    }
+
+
     public static function getMindboxId($id)
     {
         $logger = new \Mindbox\Loggers\MindboxFileLogger(Options::getModuleOption('LOG_PATH'));
