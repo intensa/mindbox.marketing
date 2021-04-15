@@ -46,38 +46,6 @@ class Helper
         return $ending;
     }
 
-    public static function updateOrderStatus($orderId, $statusCode)
-    {
-        $mindbox = Options::getConfig();
-
-        if ($mindbox) {
-            $mindboxStatusCode = Helper::getMindboxStatusByShopStatus($statusCode);
-
-            if ($mindboxStatusCode !== false) {
-                $request = $mindbox->getClientV3()->prepareRequest(
-                    'POST',
-                    Options::getOperationName('updateOrderStatus'),
-                    new DTO([
-                        'orderLinesStatus' => $mindboxStatusCode,
-                        'order' => [
-                            'ids' => [
-                                'websiteId' => $orderId
-                            ]
-                        ]
-                    ])
-                );
-
-                try {
-                    $response = $request->sendRequest();
-                } catch (Exceptions\MindboxClientException $e) {
-                    return false;
-                }
-            }
-        }
-
-    }
-
-
     public static function getMindboxId($id)
     {
         $logger = new \Mindbox\Loggers\MindboxFileLogger(Options::getModuleOption('LOG_PATH'));
@@ -832,7 +800,10 @@ class Helper
 
     public static function getBitrixOrderStatusList()
     {
-        $statusList = [];
+        $statusList = [
+            'CANCEL' => 'Отмена заказа',
+            'CANCEL_ABORT' => 'Отменить отмену заказа'
+        ];
 
         $statusResult = \Bitrix\Sale\Internals\StatusTable::getList([
             'order' => ['SORT'=>'ASC'],
@@ -843,7 +814,6 @@ class Helper
             $getStatusData = \CSaleStatus::GetByID($statusItem['ID']);
             $statusList[$statusItem['ID']] = $getStatusData['NAME'] . ' [' . $statusItem['ID'] . ']';
         }
-
 
         return $statusList;
     }
@@ -872,4 +842,36 @@ class Helper
 
         return $return;
     }
+
+    public static function updateMindboxOrderStatus($orderId, $statusCode)
+    {
+        $mindbox = Options::getConfig();
+
+        if ($mindbox) {
+            $mindboxStatusCode = Helper::getMindboxStatusByShopStatus($statusCode);
+
+            if ($mindboxStatusCode !== false) {
+                $request = $mindbox->getClientV3()->prepareRequest(
+                    'POST',
+                    Options::getOperationName('updateOrderStatus'),
+                    new DTO([
+                        'orderLinesStatus' => $mindboxStatusCode,
+                        'order' => [
+                            'ids' => [
+                                'websiteId' => $orderId
+                            ]
+                        ]
+                    ])
+                );
+
+                try {
+                    $response = $request->sendRequest();
+                } catch (Exceptions\MindboxClientException $e) {
+                    return false;
+                }
+            }
+        }
+
+    }
+
 }

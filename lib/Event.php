@@ -352,7 +352,7 @@ class Event
         $statusValue = $event->getParameter('VALUE');
 
         if ($event->getParameter('NAME') === 'STATUS_ID') {
-            Helper::updateOrderStatus($orderId, $statusValue);
+            Helper::updateMindboxOrderStatus($orderId, $statusValue);
         }
     }
 
@@ -363,9 +363,24 @@ class Event
      * @param Main\Event $event
      * @return bool
      */
-    public function OnSaleStatusOrderHandler($orderId, $orderFields)
+    public function OnSaleStatusOrderHandler($orderId, $newOrderStatus)
     {
-        Helper::updateOrderStatus($orderId, $orderFields);
+        Helper::updateMindboxOrderStatus($orderId, $newOrderStatus);
+    }
+
+    /**
+     * @bitrixModuleId sale
+     * @bitrixEventCode OnSaleCancelOrderHandler
+     * @optionNameRu Отмена заказа
+     * @param $orderId
+     * @param $cancelFlag
+     * @param $cancelDesc
+     * @return void
+     */
+    public function OnSaleCancelOrderHandler($orderId, $cancelFlag, $cancelDesc)
+    {
+        $statusCodeAlias = ($cancelFlag === 'Y') ? 'CANCEL' : 'CANCEL_ABORT';
+        Helper::updateMindboxOrderStatus($orderId, $statusCodeAlias);
     }
 
     /**
