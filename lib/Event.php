@@ -17,6 +17,7 @@ use Bitrix\Main\Page\Asset;
 use CUser;
 use DateTime;
 use DateTimeZone;
+use Intensa\Logger\ILog;
 use Mindbox\DTO\DTO;
 use Mindbox\DTO\V2\Requests\DiscountRequestDTO;
 use Mindbox\DTO\V3\Requests\CustomerRequestDTO;
@@ -1791,6 +1792,36 @@ class Event
         $jsString = "<script data-skip-moving=\"true\">\r\n" . file_get_contents($_SERVER['DOCUMENT_ROOT'] . $defaultOptions['TRACKER_JS_FILENAME']) . "</script>\r\n";
         $jsString .= '<script data-skip-moving="true" src="' . self::TRACKER_JS_FILENAME . '" async></script>';
         Asset::getInstance()->addString($jsString);
+    }
+
+
+    /**
+     * @bitrixModuleId sale
+     * @bitrixEventCode OnSalePropertyValueSetField
+     * @optionNameRu Изменение свойств заказа
+     * @notCompatible true
+     * @param Main\Event $event
+     * @return bool
+     */
+    public function OnSalePropertyValueSetFieldHandler(Main\Event $event)
+    {
+        if (\CModule::IncludeModule('intensa.logger')) {
+            $logger= new ILog('OnSalePropertyValueSetFieldHandler');
+            $logger->log('начал запись');
+        }
+
+        $getEntity = $event->getParameter('ENTITY');
+        $propertyList = $getEntity->getProperty();
+        $value = $event->getParameter('VALUE');
+        $orderMatchList = Helper::getOrderFieldsMatch();
+
+        if (!empty($orderMatchList)) {
+
+        }
+
+        $logger->log('$orderMatchList', $orderMatchList);
+        $logger->log('$propertyList', $propertyList);
+        $logger->log('$value', $value);
     }
 
     /**

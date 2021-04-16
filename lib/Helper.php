@@ -843,6 +843,30 @@ class Helper
         return $return;
     }
 
+    public static function updateMindboxOrderItemsStatus($orderId, $fields)
+    {
+        $mindbox = Options::getConfig();
+        $request = $mindbox->getClientV3()->prepareRequest(
+            'POST',
+            Options::getOperationName('updateOrderStatus'),
+            new DTO([
+                'order' => [
+                    'ids' => [
+                        'websiteId' => $orderId
+                    ],
+                    'customFields' => []
+                ]
+            ])
+        );
+
+        try {
+            $response = $request->sendRequest();
+        } catch (Exceptions\MindboxClientException $e) {
+            return false;
+        }
+    }
+
+
     public static function updateMindboxOrderStatus($orderId, $statusCode)
     {
         $mindbox = Options::getConfig();

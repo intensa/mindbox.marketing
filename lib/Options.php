@@ -52,6 +52,7 @@ class Options
         'rollbackOrderTransaction'  =>  'RollbackOrderTransaction',
         'saveOfflineOrder'          =>  'SaveOfflineOrder',
         'updateOrderStatus' => 'UpdateOrderStatus',
+        'updateOrderItemsStatus' => 'UpdateOrderItemsStatus',
     ];
 
     private static $sdkOptions = [
