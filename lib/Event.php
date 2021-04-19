@@ -1811,24 +1811,29 @@ class Event
         $order = $getEntity->getCollection()->getOrder();
         $orderId = $order->getId();
         $propertyList = $getEntity->getProperty();
-        $basketItems = $order->getBasket()->getBasketItems();
-        $lines = [];
+        $orderBasket = $order->getBasket();
 
-        foreach ($basketItems as $basketItem) {
-            $lines[] = [
-                'lineId' => $basketItem->getId(),
-                'quantity' => $basketItem->getQuantity(),
-                'status' => 'CheckedOut'
-            ];
+        if ($orderBasket) {
+            $basketItems = $orderBasket->getBasketItems();
+            $lines = [];
+
+            foreach ($basketItems as $basketItem) {
+                $lines[] = [
+                    'lineId' => $basketItem->getId(),
+                    'quantity' => $basketItem->getQuantity(),
+                    'status' => 'CheckedOut'
+                ];
+            }
+
+            if (!empty($orderMatchList) && array_key_exists($propertyList['CODE'], $orderMatchList)) {
+                $requestData = [
+                    'customFields' => [$orderMatchList[$propertyList['CODE']] => $value],
+                    'lines' => $lines
+                ];
+                Helper::updateMindboxOrderItemsStatus($orderId, $requestData);
+            }
         }
 
-        if (!empty($orderMatchList) && array_key_exists($propertyList['CODE'], $orderMatchList)) {
-            $requestData = [
-                'customFields' => [$orderMatchList[$propertyList['CODE']] => $value],
-                'lines' => $lines
-            ];
-            Helper::updateMindboxOrderItemsStatus($orderId, $requestData);
-        }
     }
 
     /**
