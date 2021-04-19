@@ -843,20 +843,27 @@ class Helper
         return $return;
     }
 
-    public static function updateMindboxOrderItemsStatus($orderId, $fields)
+    public static function updateMindboxOrderItemsStatus($orderId, $fields = [])
     {
         $mindbox = Options::getConfig();
+        $requestFields = [
+            'ids' => [
+                Options::getModuleOption('TRANSACTION_ID') => $orderId
+            ]
+        ];
+
+        if (!empty($fields) && is_array($fields)) {
+            $requestFields = $requestFields + $fields;
+        }
+
+        $requestData = [
+            'order' => $requestFields
+        ];
+
         $request = $mindbox->getClientV3()->prepareRequest(
             'POST',
-            Options::getOperationName('updateOrderStatus'),
-            new DTO([
-                'order' => [
-                    'ids' => [
-                        'websiteId' => $orderId
-                    ],
-                    'customFields' => []
-                ]
-            ])
+            Options::getOperationName('updateOrderItemsStatus'),
+            new DTO($requestData)
         );
 
         try {

@@ -1805,23 +1805,30 @@ class Event
      */
     public function OnSalePropertyValueSetFieldHandler(Main\Event $event)
     {
-        if (\CModule::IncludeModule('intensa.logger')) {
-            $logger= new ILog('OnSalePropertyValueSetFieldHandler');
-            $logger->log('начал запись');
-        }
-
-        $getEntity = $event->getParameter('ENTITY');
-        $propertyList = $getEntity->getProperty();
-        $value = $event->getParameter('VALUE');
         $orderMatchList = Helper::getOrderFieldsMatch();
+        $getEntity = $event->getParameter('ENTITY');
+        $value = $event->getParameter('VALUE');
+        $order = $getEntity->getCollection()->getOrder();
+        $orderId = $order->getId();
+        $propertyList = $getEntity->getProperty();
+        $basketItems = $order->getBasket()->getBasketItems();
+        $lines = [];
 
-        if (!empty($orderMatchList)) {
-
+        foreach ($basketItems as $basketItem) {
+            $lines[] = [
+                'lineId' => $basketItem->getId(),
+                'quantity' => $basketItem->getQuantity(),
+                'status' => 'CheckedOut'
+            ];
         }
 
-        $logger->log('$orderMatchList', $orderMatchList);
-        $logger->log('$propertyList', $propertyList);
-        $logger->log('$value', $value);
+        if (!empty($orderMatchList) && array_key_exists($propertyList['CODE'], $orderMatchList)) {
+            $requestData = [
+                'customFields' => [$orderMatchList[$propertyList['CODE']] => $value],
+                'lines' => $lines
+            ];
+            Helper::updateMindboxOrderItemsStatus($orderId, $requestData);
+        }
     }
 
     /**
