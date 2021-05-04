@@ -836,8 +836,13 @@ class Helper
         $statusOptionsJson = COption::GetOptionString(ADMIN_MODULE_NAME, 'ORDER_STATUS_FIELDS_MATCH', '{}');
         $statusOptionsData = json_decode($statusOptionsJson, true);
 
-        if (array_key_exists($shopStatus, $statusOptionsData)) {
-            $return = $statusOptionsData[$shopStatus];
+        if (!empty($statusOptionsData) && is_array($statusOptionsData)) {
+            foreach ($statusOptionsData as $item) {
+                if ($shopStatus == $item['bitrix']) {
+                    $return = $item['mindbox'];
+                    break;
+                }
+            }
         }
 
         return $return;
@@ -880,7 +885,6 @@ class Helper
 
         if ($mindbox) {
             $mindboxStatusCode = Helper::getMindboxStatusByShopStatus($statusCode);
-
             if ($mindboxStatusCode !== false) {
                 $request = $mindbox->getClientV3()->prepareRequest(
                     'POST',

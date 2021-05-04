@@ -371,7 +371,7 @@ class Event
 
     /**
      * @bitrixModuleId sale
-     * @bitrixEventCode OnSaleCancelOrderHandler
+     * @bitrixEventCode OnSaleCancelOrder
      * @optionNameRu Отмена заказа
      * @param $orderId
      * @param $cancelFlag
