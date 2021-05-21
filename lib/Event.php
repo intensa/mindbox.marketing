@@ -639,6 +639,8 @@ class Event
             return new Main\EventResult(Main\EventResult::SUCCESS);
         }
 
+        Helper::rollbackOrderTransaction($mindbox);
+
         $basket = $order->getBasket();
         global $USER;
 
@@ -804,8 +806,6 @@ class Event
                     Options::getOperationName('beginAuthorizedOrderTransaction')
                 )->sendRequest();
             }
-
-
 
             if ($createOrderResult->getValidationErrors()) {
                 $strValidationError = '';

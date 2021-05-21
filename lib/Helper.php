@@ -557,11 +557,8 @@ class Helper
         $transactionId = \Bitrix\Sale\Fuser::getId() . date('dmYHi');
         if (!$_SESSION['MINDBOX_TRANSACTION_ID']) {
             $_SESSION['MINDBOX_TRANSACTION_ID'] = $transactionId;
-
-            return $transactionId;
-        } else {
-            return $_SESSION['MINDBOX_TRANSACTION_ID'];
         }
+        return $_SESSION['MINDBOX_TRANSACTION_ID'];
     }
 
     public static function processHlbBasketRule($lineId, $mindboxPrice)
@@ -796,5 +793,36 @@ class Helper
         }
 
         return $arResultPrices;
+    }
+
+    /**
+     * @param Mindbox $mindbox
+     */
+    public static function rollbackOrderTransaction($mindbox)
+    {
+        $mindboxTransactionId = $_SESSION['MINDBOX_TRANSACTION_ID'];
+        if (!empty($mindboxTransactionId) && $mindboxTransactionId > 0) {
+            try {
+                $orderDTO = new \Mindbox\DTO\V3\Requests\OrderCreateRequestDTO();
+                $orderDTO->setField('order', [
+                    'transaction' => [
+                        "ids" => [
+                            "externalId" => Helper::getTransactionId()
+                        ]
+                    ]
+                ]);
+                $mindbox->order()->rollbackOrderTransaction(
+                    $orderDTO,
+                    Options::getOperationName('rollbackOrderTransaction')
+                )->sendRequest();
+                unset($_SESSION['MINDBOX_TRANSACTION_ID']);
+                unset($_SESSION['TOTAL_PRICE']);
+            } catch (Exceptions\MindboxClientException $e) {
+                $request = $mindbox->order()->getRequest();
+                if ($request) {
+                    QueueTable::push($request);
+                }
+            }
+        }
     }
 }
