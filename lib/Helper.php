@@ -822,7 +822,6 @@ class Helper
     {
         return [
             'CheckedOut' => 'CheckedOut',
-            'Mindbox-Tech-Cancellation' => 'Mindbox-Tech-Cancellation',
             'Delivered' => 'Delivered',
             'Paid' => 'Paid',
             'Cancelled' => 'Cancelled',
