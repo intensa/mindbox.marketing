@@ -1927,4 +1927,46 @@ class Event
 
         return $strError;
     }
+
+    /**
+     * @bitrixModuleId sale
+     * @bitrixEventCode OnSaleBasketItemEntitySaved
+     * @optionNameRu Изменение корзины
+     * @notCompatible true
+     * @return bool
+     */
+    public static function OnSaleBasketItemEntitySavedHandler(\Bitrix\Main\Event $event)
+    {
+        if (\CModule::IncludeModule('intensa.logger')) {
+            $logger = new ILog('save_basket_log');
+        }
+
+        $entity = $event->getParameter("ENTITY");
+        $values = $event->getParameter("VALUES");
+
+
+        $logger->log('$order', $entity);
+        $logger->log('$order', $values);
+        //$logger->log('$order', $orderBasket);
+        //$logger->log('$values', $values);
+    }
+
+    /**
+     * @bitrixModuleId sale
+     * @bitrixEventCode OnSaleBasketItemEntityDeleted
+     * @optionNameRu Удаление элемента из корзины товара
+     * @notCompatible true
+     * @return bool
+     */
+    public function OnSaleBasketItemDeletedHandler(\Bitrix\Main\Event $event)
+    {
+        if (\CModule::IncludeModule('intensa.logger')) {
+            $logger = new ILog('basket_delete');
+        }
+
+        $entity = $event->getParameter("ENTITY");
+        $values = $event->getParameter("VALUES");
+        $logger->log('$order', $entity);
+        $logger->log('$order', $values);
+    }
 }
