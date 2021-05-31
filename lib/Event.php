@@ -1954,7 +1954,7 @@ class Event
     /**
      * @bitrixModuleId sale
      * @bitrixEventCode OnSaleBasketItemEntityDeleted
-     * @optionNameRu Удаление элемента из корзины товара
+     * @optionNameRu Удаление элемента из корзины заказа
      * @notCompatible true
      * @return bool
      */
