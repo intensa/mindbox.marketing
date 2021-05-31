@@ -1806,22 +1806,28 @@ class Event
     public function OnSalePropertyValueSetFieldHandler(Main\Event $event)
     {
         $orderMatchList = Helper::getOrderFieldsMatch();
+
         $getEntity = $event->getParameter('ENTITY');
         $value = $event->getParameter('VALUE');
+
         $order = $getEntity->getCollection()->getOrder();
         $orderId = $order->getId();
+        $orderUserId = $order->getField('USER_ID');
+
         $propertyList = $getEntity->getProperty();
         $orderBasket = $order->getBasket();
 
         if ($orderBasket) {
             $basketItems = $orderBasket->getBasketItems();
             $lines = [];
+            $orderStatus = $order->getField('STATUS_ID');
+            $mindboxStatusCode = Helper::getMindboxStatusByShopStatus($orderStatus);
 
             foreach ($basketItems as $basketItem) {
                 $lines[] = [
                     'lineId' => $basketItem->getId(),
                     'quantity' => $basketItem->getQuantity(),
-                    'status' => 'CheckedOut'
+                    'status' => $mindboxStatusCode
                 ];
             }
 
@@ -1830,7 +1836,7 @@ class Event
                     'customFields' => [$orderMatchList[$propertyList['CODE']] => $value],
                     'lines' => $lines
                 ];
-                Helper::updateMindboxOrderItemsStatus($orderId, $requestData);
+                Helper::updateMindboxOrderItemsStatus($orderId, $orderUserId, $requestData);
             }
         }
 
@@ -1931,24 +1937,18 @@ class Event
     /**
      * @bitrixModuleId sale
      * @bitrixEventCode OnSaleBasketItemEntitySaved
-     * @optionNameRu Изменение корзины
+     * @optionNameRu Изменение корзины заказа
      * @notCompatible true
      * @return bool
      */
     public static function OnSaleBasketItemEntitySavedHandler(\Bitrix\Main\Event $event)
     {
-        if (\CModule::IncludeModule('intensa.logger')) {
-            $logger = new ILog('save_basket_log');
-        }
-
         $entity = $event->getParameter("ENTITY");
-        $values = $event->getParameter("VALUES");
+        $order = $entity->getCollection()->getOrder();
 
-
-        $logger->log('$order', $entity);
-        $logger->log('$order', $values);
-        //$logger->log('$order', $orderBasket);
-        //$logger->log('$values', $values);
+        if (!empty($order) && $order instanceof \Bitrix\Sale\Order) {
+            Helper::updateMindboxOrderLinesStatus($order);
+        }
     }
 
     /**
@@ -1960,13 +1960,11 @@ class Event
      */
     public function OnSaleBasketItemDeletedHandler(\Bitrix\Main\Event $event)
     {
-        if (\CModule::IncludeModule('intensa.logger')) {
-            $logger = new ILog('basket_delete');
-        }
-
         $entity = $event->getParameter("ENTITY");
-        $values = $event->getParameter("VALUES");
-        $logger->log('$order', $entity);
-        $logger->log('$order', $values);
+        $order = $entity->getCollection()->getOrder();
+
+        if (!empty($order) && $order instanceof \Bitrix\Sale\Order) {
+            Helper::updateMindboxOrderLinesStatus($order);
+        }
     }
 }

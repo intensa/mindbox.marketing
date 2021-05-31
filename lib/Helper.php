@@ -832,7 +832,7 @@ class Helper
     public static function getMindboxStatusByShopStatus($shopStatus)
     {
         $return = false;
-        $statusOptionsJson = COption::GetOptionString(ADMIN_MODULE_NAME, 'ORDER_STATUS_FIELDS_MATCH', '{}');
+        $statusOptionsJson = COption::GetOptionString('mindbox.marketing', 'ORDER_STATUS_FIELDS_MATCH', '{}');
         $statusOptionsData = json_decode($statusOptionsJson, true);
 
         if (!empty($statusOptionsData) && is_array($statusOptionsData)) {
@@ -847,7 +847,7 @@ class Helper
         return $return;
     }
 
-    public static function updateMindboxOrderItemsStatus($orderId, $fields = [])
+    public static function updateMindboxOrderItemsStatus($orderId, $userId, $fields = [])
     {
         $mindbox = Options::getConfig();
         $requestFields = [
@@ -861,6 +861,11 @@ class Helper
         }
 
         $requestData = [
+            'customer' => [
+                'ids' => [
+                    Options::getModuleOption('WEBSITE_ID') => $userId
+                ],
+            ],
             'order' => $requestFields
         ];
 
@@ -874,6 +879,39 @@ class Helper
             $response = $request->sendRequest();
         } catch (Exceptions\MindboxClientException $e) {
             return false;
+        }
+    }
+
+    public static function updateMindboxOrderLinesStatus(\Bitrix\Sale\Order $order)
+    {
+        $orderId = $order->getId();
+        $orderStatus = $order->getField('STATUS_ID');
+        $orderUserId = $order->getField('USER_ID');
+
+        $mindboxStatusCode = self::getMindboxStatusByShopStatus($orderStatus);
+
+        if ($mindboxStatusCode !== false) {
+            $orderBasket = $order->getBasket();
+
+            if ($orderBasket) {
+                $basketItems = $orderBasket->getBasketItems();
+                $lines = [];
+
+                foreach ($basketItems as $basketItem) {
+                    $lines[] = [
+                        'lineId' => $basketItem->getId(),
+                        'quantity' => $basketItem->getQuantity(),
+                        'status' => $mindboxStatusCode
+                    ];
+                }
+
+                if (!empty($lines) && is_array($lines)) {
+                    $requestData = [
+                        'lines' => $lines
+                    ];
+                    self::updateMindboxOrderItemsStatus($orderId, $orderUserId, $requestData);
+                }
+            }
         }
     }
 
@@ -905,7 +943,5 @@ class Helper
                 }
             }
         }
-
     }
-
 }
