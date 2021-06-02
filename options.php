@@ -62,6 +62,8 @@ if (isset($_REQUEST['save']) && check_bitrix_sessid()) {
     }
 }
 
+//$obj = \Mindbox\Components\CalculateProductData::getInstance()->sendRequest();
+
 IncludeModuleLangFile($_SERVER['DOCUMENT_ROOT'] . '/bitrix/modules/main/options.php');
 IncludeModuleLangFile(__FILE__);
 
