@@ -847,42 +847,7 @@ class Helper
         return $return;
     }
 
-    public static function updateMindboxOrderItemsStatus($orderId, $userId, $fields = [])
-    {
-        $mindbox = Options::getConfig();
-        $requestFields = [
-            'ids' => [
-                Options::getModuleOption('TRANSACTION_ID') => $orderId
-            ]
-        ];
-
-        if (!empty($fields) && is_array($fields)) {
-            $requestFields = $requestFields + $fields;
-        }
-
-        $requestData = [
-            'customer' => [
-                'ids' => [
-                    Options::getModuleOption('WEBSITE_ID') => $userId
-                ],
-            ],
-            'order' => $requestFields
-        ];
-
-        $request = $mindbox->getClientV3()->prepareRequest(
-            'POST',
-            Options::getOperationName('updateOrderItemsStatus'),
-            new DTO($requestData)
-        );
-
-        try {
-            $response = $request->sendRequest();
-        } catch (Exceptions\MindboxClientException $e) {
-            return false;
-        }
-    }
-
-    public static function updateMindboxOrderLinesStatus(\Bitrix\Sale\Order $order)
+    public static function updateMindboxOrderItems(\Bitrix\Sale\Order $order, $additionalFields = [])
     {
         $orderId = $order->getId();
         $orderStatus = $order->getField('STATUS_ID');
@@ -890,28 +855,59 @@ class Helper
 
         $mindboxStatusCode = self::getMindboxStatusByShopStatus($orderStatus);
 
-        if ($mindboxStatusCode !== false) {
-            $orderBasket = $order->getBasket();
+        $orderBasket = $order->getBasket();
 
-            if ($orderBasket) {
-                $basketItems = $orderBasket->getBasketItems();
-                $lines = [];
+        if ($orderBasket) {
+            $basketItems = $orderBasket->getBasketItems();
+            $lines = [];
 
-                foreach ($basketItems as $basketItem) {
-                    $lines[] = [
-                        'lineId' => $basketItem->getId(),
-                        'quantity' => $basketItem->getQuantity(),
-                        'status' => $mindboxStatusCode
-                    ];
-                }
-
-                if (!empty($lines) && is_array($lines)) {
-                    $requestData = [
-                        'lines' => $lines
-                    ];
-                    self::updateMindboxOrderItemsStatus($orderId, $orderUserId, $requestData);
-                }
+            foreach ($basketItems as $basketItem) {
+                $lines[] = [
+                    'lineId' => $basketItem->getId(),
+                    'quantity' => $basketItem->getQuantity(),
+                    'basePricePerItem' => $basketItem->getPrice(),
+                    'status' => $mindboxStatusCode,
+                    'product'          => [
+                        'ids' => [
+                            Options::getModuleOption('EXTERNAL_SYSTEM') => Helper::getElementCode($basketItem->getProductId())
+                        ]
+                    ],
+                ];
             }
+        }
+
+
+        $mindbox = Options::getConfig();
+        $requestFields = [
+            'ids' => [
+                Options::getModuleOption('TRANSACTION_ID') => $orderId
+            ],
+            'lines' => $lines
+        ];
+
+        if (!empty($additionalFields) && is_array($additionalFields)) {
+            $requestFields = $requestFields + $additionalFields;
+        }
+
+        $requestData = [
+            'customer' => [
+                'ids' => [
+                    Options::getModuleOption('WEBSITE_ID') => $orderUserId
+                ],
+            ],
+            'order' => $requestFields
+        ];
+
+        $request = $mindbox->getClientV3()->prepareRequest(
+            'POST',
+            Options::getOperationName('updateOrderItems'),
+            new DTO($requestData)
+        );
+
+        try {
+            $response = $request->sendRequest();
+        } catch (Exceptions\MindboxClientException $e) {
+            return false;
         }
     }
 

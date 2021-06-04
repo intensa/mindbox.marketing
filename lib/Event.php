@@ -1809,37 +1809,16 @@ class Event
 
         $getEntity = $event->getParameter('ENTITY');
         $value = $event->getParameter('VALUE');
-
         $order = $getEntity->getCollection()->getOrder();
-        $orderId = $order->getId();
-        $orderUserId = $order->getField('USER_ID');
+        $propertyData = $getEntity->getProperty();
 
-        $propertyList = $getEntity->getProperty();
-        $orderBasket = $order->getBasket();
+        if (!empty($order) && $order instanceof \Bitrix\Sale\Order) {
+            $additionFields = [
+                'customFields' => [$orderMatchList[$propertyData['CODE']] => $value],
+            ];
 
-        if ($orderBasket) {
-            $basketItems = $orderBasket->getBasketItems();
-            $lines = [];
-            $orderStatus = $order->getField('STATUS_ID');
-            $mindboxStatusCode = Helper::getMindboxStatusByShopStatus($orderStatus);
-
-            foreach ($basketItems as $basketItem) {
-                $lines[] = [
-                    'lineId' => $basketItem->getId(),
-                    'quantity' => $basketItem->getQuantity(),
-                    'status' => $mindboxStatusCode
-                ];
-            }
-
-            if (!empty($orderMatchList) && array_key_exists($propertyList['CODE'], $orderMatchList)) {
-                $requestData = [
-                    'customFields' => [$orderMatchList[$propertyList['CODE']] => $value],
-                    'lines' => $lines
-                ];
-                Helper::updateMindboxOrderItemsStatus($orderId, $orderUserId, $requestData);
-            }
+            Helper::updateMindboxOrderItems($order, $additionFields);
         }
-
     }
 
     /**
@@ -1947,7 +1926,7 @@ class Event
         $order = $entity->getCollection()->getOrder();
 
         if (!empty($order) && $order instanceof \Bitrix\Sale\Order) {
-            Helper::updateMindboxOrderLinesStatus($order);
+            Helper::updateMindboxOrderItems($order);
         }
     }
 
@@ -1964,7 +1943,7 @@ class Event
         $order = $entity->getCollection()->getOrder();
 
         if (!empty($order) && $order instanceof \Bitrix\Sale\Order) {
-            Helper::updateMindboxOrderLinesStatus($order);
+            Helper::updateMindboxOrderItems($order);
         }
     }
 }
