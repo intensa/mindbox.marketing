@@ -53,7 +53,8 @@ class Options
         'saveOfflineOrder'          =>  'SaveOfflineOrder',
         'setWishList'   =>  'SetWishList',
         'clearWishList' =>  'ClearWishList',
-        'clearCart'     =>  'ClearCart'
+        'clearCart'     =>  'ClearCart',
+        'calculateUnauthorizedProduct' => 'CalculateUnauthorizedProduct'
     ];
 
     private static $sdkOptions = [
