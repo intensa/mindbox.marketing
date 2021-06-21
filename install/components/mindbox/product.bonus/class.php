@@ -40,7 +40,19 @@ class ProductBonus extends CBitrixComponent implements Controllerable
         return md5($this->GetTemplate()->__file . '_' . $this->arParams['XML_ID']);
     }
 
+    protected function createPlaceholder()
+    {
+        $return = "{{MINDBOX_BONUS|{$this->arParams['ID']}|{$this->arParams['PRICE']}}}";
+        return $return;
+    }
+
     public function executeComponent()
+    {
+        $this->arResult['MINDBOX_PLACEHOLDER'] = $this->createPlaceholder();
+        $this->includeComponentTemplate();
+    }
+
+    public function executeComponent__()
     {
         if (isset($this->arParams['XML_ID']) && isset($this->arParams['PRICE'])) {
 

@@ -17,6 +17,8 @@ use Bitrix\Sale;
 use CUser;
 use DateTime;
 use DateTimeZone;
+use Intensa\Logger\ILog;
+use Mindbox\Components\CalculateProductData;
 use Mindbox\DTO\DTO;
 use Mindbox\DTO\V2\Requests\DiscountRequestDTO;
 use Mindbox\DTO\V3\Requests\CustomerRequestDTO;
@@ -1829,6 +1831,24 @@ class Event
         $jsString = "<script data-skip-moving=\"true\">\r\n" . file_get_contents($_SERVER['DOCUMENT_ROOT'] . $defaultOptions['TRACKER_JS_FILENAME']) . "</script>\r\n";
         $jsString .= '<script data-skip-moving="true" src="' . self::TRACKER_JS_FILENAME . '" async></script>';
         Asset::getInstance()->addString($jsString);
+    }
+
+
+    /**
+     * @bitrixModuleId main
+     * @bitrixEventCode OnEndBufferContent
+     * @langEventName OnEndBufferContent
+     * @param $content
+     */
+    public function OnEndBufferContentHandler(&$content)
+    {
+        if (\CModule::IncludeModule('intensa.logger')) {
+            $logger = new ILog('OnEndBufferContentHandler');
+        }
+
+        $logger->log('content', $content);
+        $calc = new CalculateProductData();
+        $calc->handle($content);
     }
 
     /**

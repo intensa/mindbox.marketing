@@ -4,6 +4,7 @@
 namespace Mindbox\Components;
 
 
+use Intensa\Logger\ILog;
 use Mindbox\DTO\DTO;
 use Mindbox\Helper;
 use Mindbox\Options;
@@ -12,80 +13,87 @@ class CalculateProductData
 {
     const CACHE_TIME = 600;
     private $productData = [];
-    private static $instance = null;
     protected $mindbox = null;
     protected $optionExternalSystem = '';
     protected $operationUnauthorized = '';
+    protected $placeholderRegEx = '/{{(MINDBOX_BONUS|MINDBOX_PRICE)\|(\d+)\|(\d+)}}/m';
+    protected $placeholdersList = [];
 
 
-    private function __construct()
+    public function __construct()
     {
         $this->mindbox = Options::getConfig();
         $this->optionExternalSystem = Options::getModuleOption('EXTERNAL_SYSTEM');
         $this->operationUnauthorized = Options::getOperationName('calculateUnauthorizedProduct');
     }
 
-    static function getInstance()
+    public function handle($content)
     {
-        if (is_null(self::$instance)) {
-            self::$instance = new self();
+        $searchItems = $this->searchPlaceholder($content);
+        if (\CModule::IncludeModule('intensa.logger')) {
+            $logger = new ILog('mb_matches');
         }
 
-        return self::$instance;
-    }
+        $logger->log('$matches', $searchItems);
+        if (!empty($searchItems) && is_array($searchItems)) {
+            $requestProductList = [];
 
-    public function setProduct($productData)
-    {
-        if (!empty($productData)) {
+            foreach ($searchItems as $item) {
+                $requestProductList[$item['id']] = [
+                    'id' => $item['id'],
+                    'price' => $item['price']
+                ];
+            }
+            $logger->log('$requestProductList', $requestProductList);
+            $mindboxResponse = $this->requestOperation($requestProductList);
 
-            $this->productData[] = $productData;
-        }
-    }
+            if (!empty($mindboxResponse)) {
+                foreach ($mindboxResponse as $productId => $responseItem) {
 
-    public function setProductList($productList)
-    {
-        if (!empty($productList) && is_array($productList)) {
-            $setProductList = [];
+                    if (!empty($responseItem['priceForCustomer'])) {
+                        $requestProductList[$productId]['MINDBOX_PRICE'] = $responseItem['priceForCustomer'];
+                        $requestProductList[$productId]['MINDBOX_OLD_PRICE'] = $responseItem['basePricePerItem'];
+                    } else {
+                        $requestProductList[$productId]['MINDBOX_PRICE'] = $responseItem['basePricePerItem'];
+                    }
 
-            foreach ($productList as $item) {
-                if (!empty($item['XML_ID'])) {
-                    $setProductList[$item['XML_ID']] = $item;
+                    if (!empty($responseItem['appliedPromotions'])) {
+                        foreach ($responseItem['appliedPromotions'] as $promotion) {
+                            if ($promotion['type'] === 'earnedBonusPoints' && !empty($promotion['amount'])) {
+                                $requestProductList[$productId]['MINDBOX_BONUS'] = $promotion['amount'];
+                            }
+                        }
+                    }
+
                 }
             }
 
-            $this->productData = $setProductList;
+
+            $logger->log('resp', $mindboxResponse);
+            $logger->log('$requestProductList', $requestProductList);
         }
     }
 
-    public function getProducts()
+    public function searchPlaceholder($content)
     {
-        return $this->productData;
-    }
+        $matches = [];
+        preg_match_all($this->placeholderRegEx, $content, $matches, PREG_SET_ORDER, 0);
 
-    public function getIntegrationData()
-    {
-        $mindboxProductData = $this->receiveProductData();
-        $integrationProductList = $this->productData;
-
-        if (!empty($mindboxProductData)) {
-            foreach ($integrationProductList as &$item) {
-                if (array_key_exists($item['XML_ID'], $mindboxProductData)) {
-                    $item['CALCULATE'] = $mindboxProductData[$item['XML_ID']];
-                }
-            }
-        }
-
-        return $integrationProductList;
-    }
-
-    public function receiveProductData()
-    {
-        // @todo тут нужно будет добавить массив переданых твоаров + добавить кол-во на проверку
         $return = [];
-        // тут реализовать получения чанками
 
-        $products = $this->getProducts();
-        $return = $this->requestOperation($products);
+        if (!empty($matches)) {
+            foreach ($matches as $item) {
+                $return[$item[0]] = [
+                    'placeholder' => $item[0],
+                    'type' => $item[1],
+                    'id' => $item[2],
+                    'price' => $item[3],
+                ];
+            }
+
+            $this->placeholdersList = $return;
+        }
+
         return $return;
     }
 
@@ -99,14 +107,14 @@ class CalculateProductData
 
         foreach ($productList as $item) {
 
-            if (!empty($item['XML_ID']) && !empty($item['PRICE'])) {
+            if (!empty($item['id']) && !empty($item['price'])) {
                 $return['productList']['items'][] = [
                     'product' => [
                         'ids' => [
-                            $this->optionExternalSystem => $item['XML_ID']
+                            $this->optionExternalSystem => $item['id']
                         ]
                     ],
-                    'basePricePerItem' => $item['PRICE']
+                    'basePricePerItem' => $item['price']
                 ];
             }
         }
