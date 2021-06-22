@@ -8,17 +8,18 @@ use Intensa\Logger\ILog;
 use Mindbox\DTO\DTO;
 use Mindbox\Helper;
 use Mindbox\Options;
+use \Bitrix\Main\Data\Cache;
 
 class CalculateProductData
 {
     const CACHE_TIME = 600;
-    private $productData = [];
+    const CACHE_PREFIX = '';
+    const MAX_CHUNK_VALUE = 50;
     protected $mindbox = null;
     protected $optionExternalSystem = '';
     protected $operationUnauthorized = '';
-    protected $placeholderRegEx = '/{{(MINDBOX_BONUS|MINDBOX_PRICE)\|(\d+)\|(\d+)}}/m';
+    protected $placeholderRegEx = '/{{(MINDBOX_BONUS|MINDBOX_PRICE|MINDBOX_OLD_PRICE)\|(\d+)\|(\d+)}}/m';
     protected $placeholdersList = [];
-
 
     public function __construct()
     {
@@ -27,11 +28,12 @@ class CalculateProductData
         $this->operationUnauthorized = Options::getOperationName('calculateUnauthorizedProduct');
     }
 
-    public function handle($content)
+    public function handle(&$content)
     {
         $searchItems = $this->searchPlaceholder($content);
+
         if (\CModule::IncludeModule('intensa.logger')) {
-            $logger = new ILog('mb_matches');
+            $logger = new ILog('mb_matches2');
         }
 
         $logger->log('$matches', $searchItems);
@@ -44,8 +46,18 @@ class CalculateProductData
                     'price' => $item['price']
                 ];
             }
-            $logger->log('$requestProductList', $requestProductList);
-            $mindboxResponse = $this->requestOperation($requestProductList);
+
+            $mindboxResponse = [];
+
+            if (count($requestProductList) > self::MAX_CHUNK_VALUE) {
+                $requestChunk = array_chunk($requestProductList, self::MAX_CHUNK_VALUE);
+
+                foreach ($requestChunk as $chunk) {
+                    $mindboxResponse = array_merge($mindboxResponse, $this->requestOperation($chunk));
+                }
+            } else {
+                $mindboxResponse = $this->requestOperation($requestProductList);
+            }
 
             if (!empty($mindboxResponse)) {
                 foreach ($mindboxResponse as $productId => $responseItem) {
@@ -65,13 +77,56 @@ class CalculateProductData
                         }
                     }
 
+                    $this->createProductCache($productId, $requestProductList[$productId]);
                 }
             }
 
-
-            $logger->log('resp', $mindboxResponse);
             $logger->log('$requestProductList', $requestProductList);
+
+            // получили данные и делаем замену в контенте
+
+            foreach ($searchItems as $placeholderKey => $replaceItem) {
+                $replaceValue = '';
+
+                if (
+                    array_key_exists($replaceItem['id'], $requestProductList)
+                && isset($requestProductList[$replaceItem['id']][$replaceItem['type']])
+                ) {
+                    $replaceValue = $requestProductList[$replaceItem['id']][$replaceItem['type']];
+                }
+
+                $content = str_replace($placeholderKey, $replaceValue, $content);
+            }
         }
+    }
+
+    protected static function getCacheId($productId)
+    {
+        return self::CACHE_PREFIX . $productId;
+    }
+
+    public function createProductCache($productId, $data)
+    {
+        $cache = Cache::createInstance();
+        $cache->initCache(self::CACHE_TIME, self::getCacheId($productId));
+        $cache->startDataCache();
+        $cache->endDataCache(['data' => $data]);
+    }
+
+    public static function getProductCache($productId)
+    {
+        $return = false;
+        $cache = Cache::createInstance();
+
+        if ($cache->initCache(self::CACHE_TIME, self::getCacheId($productId))) {
+            $cacheVars = $cache->getVars();
+
+            if (!empty($cacheVars['data'])) {
+                $return = $cacheVars['data'];
+            }
+        }
+
+        return $return;
     }
 
     public function searchPlaceholder($content)

@@ -4,6 +4,7 @@ use Bitrix\Main\Engine\Contract\Controllerable;
 use Bitrix\Main\Loader;
 use Bitrix\Main\LoaderException;
 use \Bitrix\Main\Data\Cache;
+use Mindbox\Ajax;
 
 if (!defined("B_PROLOG_INCLUDED") || B_PROLOG_INCLUDED !== true) {
     die();
@@ -11,6 +12,7 @@ if (!defined("B_PROLOG_INCLUDED") || B_PROLOG_INCLUDED !== true) {
 
 class ProductBonus extends CBitrixComponent implements Controllerable
 {
+    const PLACEHOLDER_PREFIX = 'MINDBOX_BONUS';
 
     public function __construct(CBitrixComponent $component = null)
     {
@@ -25,8 +27,6 @@ class ProductBonus extends CBitrixComponent implements Controllerable
             ShowError(GetMessage('MB_AUS_MODULE_NOT_INCLUDED', ['#MODULE#' => 'mindbox.marketing']));;
             return;
         }
-
-
     }
 
     public function configureActions()
@@ -34,59 +34,27 @@ class ProductBonus extends CBitrixComponent implements Controllerable
         return Ajax::configureActions($this->actions);
     }
 
-    public function getIntegrationKey()
+    public function calculateProductAction($phone)
     {
-        $this->InitComponentTemplate();
-        return md5($this->GetTemplate()->__file . '_' . $this->arParams['XML_ID']);
+        return ['test' => 1];
     }
 
     protected function createPlaceholder()
     {
-        $return = "{{MINDBOX_BONUS|{$this->arParams['ID']}|{$this->arParams['PRICE']}}}";
-        return $return;
+        $prefix = self::PLACEHOLDER_PREFIX;
+        return "{{{$prefix}|{$this->arParams['ID']}|{$this->arParams['PRICE']}}}";
     }
 
     public function executeComponent()
     {
-        $this->arResult['MINDBOX_PLACEHOLDER'] = $this->createPlaceholder();
-        $this->includeComponentTemplate();
-    }
+        $productCache = \Mindbox\Components\CalculateProductData::getProductCache($this->arParams['ID']);
 
-    public function executeComponent__()
-    {
-        if (isset($this->arParams['XML_ID']) && isset($this->arParams['PRICE'])) {
-
-            $useIntegration = true;
-            $cache = Cache::createInstance();
-
-            if ($cache->initCache(3600, 'mindbox_product_' . $this->arParams['XML_ID'])) {
-                $cacheVars = $cache->getVars();
-                $this->arResult['DATA'] = $cacheVars['mindbox_data'];
-                $this->arResult['INIT_CACHE'] = 'Y';
-                $useIntegration = false;
-            } else {
-                $integrationKey = $this->getIntegrationKey();
-
-                if (!empty($integrationKey)) {
-                    $this->arResult['INTEGRATION_KEY'] = $integrationKey;
-                }
-
-                $execComponentFields = [
-                    'XML_ID' => $this->arParams['XML_ID'],
-                    'PRICE' => $this->arParams['PRICE'],
-                    'COMPONENT_TEMPLATE' => $this->GetTemplate()->__file,
-                    'INTEGRATION_KEY' => $integrationKey
-                ];
-
-                \Mindbox\Components\CalculateProductData::getInstance()->setProduct($execComponentFields);
-            }
+        if (!empty($productCache)) {
+            $this->arResult['MINDBOX_BONUS'] = $productCache['MINDBOX_BONUS'];
+        } else {
+            $this->arResult['MINDBOX_BONUS'] = $this->createPlaceholder();
         }
 
-        $includeTemplate = ($useIntegration) ? 'view' : '';
-        global $APPLICATION;
-        $APPLICATION->RestartBuffer();
-        var_dump($this->arResult);
-        die();
-        $this->includeComponentTemplate($includeTemplate);
+        $this->includeComponentTemplate();
     }
 }
