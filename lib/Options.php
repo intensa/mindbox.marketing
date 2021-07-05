@@ -51,6 +51,9 @@ class Options
         'commitOrderTransaction'    =>  'CommitOrderTransaction',
         'rollbackOrderTransaction'  =>  'RollbackOrderTransaction',
         'saveOfflineOrder'          =>  'SaveOfflineOrder',
+        'setWishList'   =>  'SetWishList',
+        'clearWishList' =>  'ClearWishList',
+        'clearCart'     =>  'ClearCart',
         'updateOrderStatus' => 'UpdateOrderStatus',
         'updateOrderItems' => 'UpdateOrderItems',
     ];
