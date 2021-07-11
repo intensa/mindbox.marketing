@@ -1073,6 +1073,7 @@ class Helper
      */
     public static function isAdminSection()
     {
-        return (defined('ADMIN_SECTION') && ADMIN_SECTION === true);
+        $request = \Bitrix\Main\Context::getCurrent()->getRequest();
+        return  $request->isAdminSection();
     }
 }
