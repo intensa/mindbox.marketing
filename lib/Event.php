@@ -836,9 +836,14 @@ class Event
                     Options::getOperationName('beginUnauthorizedOrderTransaction')
                 )->sendRequest();
             } else {
+
+                $operationNameAlias = (Helper::isAdminSection())
+                    ? 'beginAuthorizedOrderTransaction'
+                    : 'beginAuthorizedOrderTransactionAdmin';
+
                 $createOrderResult = $mindbox->order()->beginAuthorizedOrderTransaction(
                     $orderDTO,
-                    Options::getOperationName('beginAuthorizedOrderTransaction')
+                    Options::getOperationName($operationNameAlias)
                 )->sendRequest();
             }
 
@@ -858,9 +863,13 @@ class Event
                             ]
                         ]
                     ]);
+                    $operationNameAlias = (Helper::isAdminSection())
+                        ? 'rollbackOrderTransaction'
+                        : 'rollbackOrderTransactionAdmin';
+
                     $createOrderResult = $mindbox->order()->rollbackOrderTransaction(
                         $orderDTO,
-                        Options::getOperationName('rollbackOrderTransaction')
+                        Options::getOperationName($operationNameAlias)
                     )->sendRequest();
 
                     unset($_SESSION['TOTAL_PRICE']);
@@ -902,9 +911,14 @@ class Event
                     ]
                 ]
             ]);
+
+            $operationNameAlias = (Helper::isAdminSection())
+                ? 'rollbackOrderTransaction'
+                : 'rollbackOrderTransactionAdmin';
+
             $mindbox->order()->rollbackOrderTransaction(
                 $orderDTO,
-                Options::getOperationName('rollbackOrderTransaction')
+                Options::getOperationName($operationNameAlias)
             )->sendRequest();
 
             unset($_SESSION['TOTAL_PRICE']);
@@ -1105,10 +1119,16 @@ class Event
                         ]
                     ]
                 ]);
+
+                $operationNameAlias = (Helper::isAdminSection())
+                    ? 'commitOrderTransaction'
+                    : 'commitOrderTransactionAdmin';
+
                 $createOrderResult = $mindbox->order()->commitOrderTransaction(
                     $orderDTO,
-                    Options::getOperationName('commitOrderTransaction')
+                    Options::getOperationName($operationNameAlias)
                 )->sendRequest();
+
                 unset($_SESSION['MINDBOX_TRANSACTION_ID']);
                 unset($_SESSION['PAY_BONUSES']);
                 unset($_SESSION['TOTAL_PRICE']);
@@ -1527,9 +1547,13 @@ class Event
 
         try {
             if ($USER->IsAuthorized()) {
+                $operationNameAlias = (Helper::isAdminSection())
+                    ? 'calculateAuthorizedCart'
+                    : 'calculateAuthorizedCartAdmin';
+
                 $preorderInfo = $mindbox->order()->calculateAuthorizedCart(
                     $preorder,
-                    Options::getOperationName('calculateAuthorizedCart')
+                    Options::getOperationName($operationNameAlias)
                 )->sendRequest()->getResult()->getField('order');
             } else {
                 $preorderInfo = $mindbox->order()->calculateUnauthorizedCart(

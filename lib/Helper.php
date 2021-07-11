@@ -1066,4 +1066,13 @@ class Helper
 
         return $isNewOrder;
     }
+
+    /**
+     * Проверяет находимся ли мы в административной части сайта
+     * @return bool
+     */
+    public static function isAdminSection()
+    {
+        return (defined('ADMIN_SECTION') && ADMIN_SECTION === true);
+    }
 }
