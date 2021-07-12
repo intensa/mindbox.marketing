@@ -1073,7 +1073,10 @@ class Helper
      */
     public static function isAdminSection()
     {
+        global $APPLICATION;
+        $currentPage = $APPLICATION->GetCurPage();
         $request = \Bitrix\Main\Context::getCurrent()->getRequest();
-        return  $request->isAdminSection();
+
+        return  ($request->isAdminSection() && strpos($currentPage, '/bitrix/admin') !== false);
     }
 }
