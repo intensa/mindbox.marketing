@@ -354,7 +354,7 @@ class Event
     /**
      * @bitrixModuleId sale
      * @bitrixEventCode OnBeforeSaleShipmentSetField
-     * @optionNameRu OnBeforeSaleShipmentSetField
+     * @langEventName OnBeforeSaleShipmentSetField
      * @notCompatible true
      * @param Main\Event $event
      * @return bool
@@ -373,7 +373,7 @@ class Event
     /**
      * @bitrixModuleId sale
      * @bitrixEventCode OnSaleStatusOrder
-     * @optionNameRu OnSaleStatusOrder
+     * @langEventName OnSaleStatusOrder
      * @param Main\Event $event
      * @return bool
      */
@@ -385,7 +385,7 @@ class Event
     /**
      * @bitrixModuleId sale
      * @bitrixEventCode OnSaleCancelOrder
-     * @optionNameRu OnSaleCancelOrder
+     * @langEventName OnSaleCancelOrder
      * @param $orderId
      * @param $cancelFlag
      * @param $cancelDesc
@@ -1881,7 +1881,7 @@ class Event
     /**
      * @bitrixModuleId sale
      * @bitrixEventCode OnSalePropertyValueSetField
-     * @optionNameRu OnSalePropertyValueSetField
+     * @langEventName OnSalePropertyValueSetField
      * @notCompatible true
      * @param Main\Event $event
      * @return bool
