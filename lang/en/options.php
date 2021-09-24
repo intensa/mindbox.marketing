@@ -37,7 +37,7 @@ $MESS['STANDARD'] = 'Standard';
 $MESS['NEED_TABLE_UPGRADE'] = 'To speed up yml generation, change location of the properties in the <a href="#LINK#" target="_blank">settings</a>. The properties are required to be <a href="https://dev.1c-bitrix.ru/user_help/content/iblock/iblock_edit.php" target="_blank">stored in a separate table</a>.';
 $MESS['BRAND'] = "Brand";
 $MESS['SYSTEM_NAME'] = "System name";
-$MESS['LOYALTY'] = 'Loyality';
+$MESS['LOYALTY'] = 'Loyality' .  html_entity_decode('&#946;');
 $MESS['SAVE'] = 'Save';
 $MESS['CLIENTS'] = 'Clients settings';
 $MESS['API_DOMAIN'] = 'API Domain';
