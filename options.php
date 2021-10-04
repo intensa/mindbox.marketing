@@ -67,7 +67,7 @@ IncludeModuleLangFile(__FILE__);
 
 include("install/version.php");
 
-$tabControl = new CAdminTabControl('tabControl', [
+$tabsList = [
     [
         'DIV'   => 'edit1',
         'TAB'   => getMessage('COMMON_SETTINGS'),
@@ -87,9 +87,33 @@ $tabControl = new CAdminTabControl('tabControl', [
         'DIV'   => 'edit4',
         'TAB'   => getMessage('ORDERS'),
         'TITLE' => getMessage('ORDERS'),
-    ]
-]);
+    ],
 
+];
+
+$systemFile = __DIR__ . '/.system/alfa.php';
+$showDevSection = false;
+if (file_exists($systemFile)) {
+
+    $arAllOptions['ALFA'] = [
+        [
+            'EXTERNAL_SYSTEM2',
+            getMessage('EXTERNAL_SYSTEM'),
+            COption::GetOptionString(MINDBOX_ADMIN_MODULE_NAME, 'EXTERNAL_SYSTEM', ''),
+            ['text']
+        ],
+    ];
+
+    $tabsList[] = [
+        'DIV'   => 'edit5',
+        'TAB'   => 'DEV',
+        'TITLE' => 'DEV',
+    ];
+
+    $showDevSection = true;
+}
+
+$tabControl = new CAdminTabControl('tabControl', $tabsList);
 
 $arAllOptions['COMMON'] = [
     ['', '', Helper::adminTableScripts(), ['statichtml']],
@@ -375,6 +399,11 @@ $arAllOptions['COMMON'][] = [
     ShowParamsHTMLByArray($arAllOptions['ORDERS']);
     $tabControl->EndTab();
 
+    if ($showDevSection) {
+        $tabControl->BeginNextTab();
+        require_once $systemFile;
+        $tabControl->EndTab();
+    }
 
     $tabControl->Buttons(); ?>
     <input type='submit' class='adm-btn-save' name='save' value='<?= getMessage('SAVE') ?>'>
