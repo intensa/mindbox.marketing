@@ -1084,14 +1084,13 @@ class Event
             $lines = [];
             $i = 1;
             foreach ($basketItems as $basketItem) {
-                if ($basketItem->getField('CAN_BUY') == 'N') {
-                    continue;
-                }
+
                 $productBasePrice = $basketItem->getBasePrice();
                 $requestedPromotions = Helper::getRequestedPromotions($basketItem, $order);
 
                 $propertyCollection = $order->getPropertyCollection();
                 $ar = $propertyCollection->getArray();
+
                 foreach ($ar['properties'] as $arProperty) {
                     $arProperty['CODE'] = Helper::sanitizeNamesForMindbox($arProperty['CODE']);
                     $arOrderProperty[$arProperty['CODE']] = current($arProperty['VALUE']);
@@ -1122,7 +1121,31 @@ class Event
             }
 
             if (empty($lines)) {
+
+                if (Helper::isAdminSection()) {
+                    try {
+                        $orderDTO = new OrderCreateRequestDTO();
+                        $orderDTO->setField('order', [
+                            'transaction' => [
+                                'ids' => [
+                                    'externalId' => Helper::getTransactionId()
+                                ]
+                            ]
+                        ]);
+                       $mindbox->order()->rollbackOrderTransaction(
+                            $orderDTO,
+                            Options::getOperationName('rollbackOrderTransaction' . (Helper::isAdminSection()? 'Admin':''))
+                        )->sendRequest();
+                    } catch (Exceptions\MindboxClientException $e) {
+                        $request = $mindbox->order()->getRequest();
+                        if ($request) {
+                            QueueTable::push($request);
+                        }
+                    }
+                }
+
                 Transaction::getInstance()->clear();
+
                 return new Main\EventResult(Main\EventResult::SUCCESS);
             }
 
