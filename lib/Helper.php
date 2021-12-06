@@ -570,9 +570,9 @@ class Helper
      *
      * @return int
      */
-    public static function getTransactionId()
+    public static function getTransactionId($orderId = false)
     {
-        return Transaction::getInstance()->get();
+        return Transaction::getInstance($orderId)->get();
     }
 
     public static function processHlbBasketRule($lineId, $mindboxPrice)

@@ -716,7 +716,36 @@ class Event
         if (!$isNewOrder && !Helper::isAdminSection()) {
             return new Main\EventResult(Main\EventResult::SUCCESS);
         }
-    
+
+        if (!$isNewOrder) {
+            $existTransaction = Transaction::existOpenTransaction($order->getId());
+
+            if (!empty($existTransaction)) {
+                try {
+                    $orderDTO = new OrderCreateRequestDTO();
+                    $orderDTO->setField('order', [
+                        'transaction' => [
+                            'ids' => [
+                                'externalId' => $existTransaction['transaction']
+                            ]
+                        ]
+                    ]);
+
+                    $mindbox->order()->rollbackOrderTransaction(
+                        $orderDTO,
+                        Options::getOperationName('rollbackOrderTransactionAdmin')
+                    )->sendRequest();
+
+                    $request = $mindbox->order()->getRequest();
+                    // закрываем транзакцию
+                    Transaction::closeTransaction($existTransaction['id']);
+
+                } catch (\Exception $exception) {
+
+                }
+            }
+        }
+
         if (!$isNewOrder && !Helper::isMindboxOrder($order->getId())) {
             return new Main\EventResult(Main\EventResult::SUCCESS);
         }
@@ -818,7 +847,7 @@ class Event
             'lines'        => $lines,
             'transaction'  => [
                 'ids' => [
-                    'externalId' => Helper::getTransactionId()
+                    'externalId' => Helper::getTransactionId($shopOrderId)
                 ]
             ],
             'payments'     => $payments,
@@ -919,7 +948,7 @@ class Event
                     $orderDTO->setField('order', [
                         'transaction' => [
                             'ids' => [
-                                'externalId' => Helper::getTransactionId()
+                                'externalId' => Helper::getTransactionId($order->getId())
                             ]
                         ]
                     ]);
@@ -984,7 +1013,7 @@ class Event
                 $orderDTO->setField('order', [
                     'transaction' => [
                         'ids' => [
-                            'externalId' => Helper::getTransactionId()
+                            'externalId' => Helper::getTransactionId($order->getId())
                         ]
                     ]
                 ]);
@@ -1128,7 +1157,7 @@ class Event
                         $orderDTO->setField('order', [
                             'transaction' => [
                                 'ids' => [
-                                    'externalId' => Helper::getTransactionId()
+                                    'externalId' => Helper::getTransactionId($order->getId())
                                 ]
                             ]
                         ]);
@@ -1233,7 +1262,7 @@ class Event
                     ],
                     'transaction' => [
                         'ids' => [
-                            "externalId" => Helper::getTransactionId()
+                            "externalId" => Helper::getTransactionId($order->getId())
                         ]
                     ]
                 ]);
@@ -1271,7 +1300,7 @@ class Event
                     }
                 }
 
-                Transaction::getInstance()->clear();
+                Transaction::getInstance()->close();
 
                 unset($_SESSION['PROMO_CODE_AMOUNT']);
                 unset($_SESSION['PROMO_CODE']);
