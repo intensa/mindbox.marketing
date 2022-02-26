@@ -181,6 +181,7 @@ class Helper
             'mobilePhone' => self::normalizePhoneNumber($arFields['PERSONAL_PHONE']),
             'birthDate'   => Helper::formatDate($arFields['PERSONAL_BIRTHDAY']),
             'sex'         => $sex,
+            'ids'         => [Options::getModuleOption('WEBSITE_ID') => $websiteUserId]
         ];
 
         $fields = array_filter($fields, function ($item) {
