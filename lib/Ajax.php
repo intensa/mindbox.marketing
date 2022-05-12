@@ -10,7 +10,7 @@ class Ajax
 {
     public static function configureActions($actions)
     {
-        $actionConfig = array();
+        $actionConfig = [];
         foreach ($actions as $action) {
             $actionConfig[$action] = ['prefilters' => []];
         }
