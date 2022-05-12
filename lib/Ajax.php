@@ -7,7 +7,6 @@ namespace Mindbox;
 
 class Ajax
 {
-
     public static function configureActions($actions)
     {
         $actionConfig = [];
