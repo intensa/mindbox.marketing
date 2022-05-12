@@ -28,8 +28,7 @@ class Ajax
         return $response;
     }
 
-    public static function loadParams($componentName)
-    {
+    public static function loadParams($componentName) {
         $params = [];
 
         if(isset($_SESSION[$componentName]) && is_array($_SESSION[$componentName])) {
