@@ -1,4 +1,5 @@
 <?php
+
 /**
  * Created by @copyright QSOFT.
  */
@@ -9,7 +10,7 @@ class Ajax
 {
     public static function configureActions($actions)
     {
-        $actionConfig = [];
+        $actionConfig = array();
         foreach ($actions as $action) {
             $actionConfig[$action] = ['prefilters' => []];
         }
@@ -19,7 +20,7 @@ class Ajax
     public static function errorResponse($error)
     {
         $response['type'] = 'error';
-        if(is_subclass_of($error, \Exception::class)) {
+        if (is_subclass_of($error, \Exception::class)) {
             $response['message'] = $error->getMessage();
         } else {
             $response['message'] = $error;
@@ -28,14 +29,14 @@ class Ajax
         return $response;
     }
 
-    public static function loadParams($componentName) {
+    public static function loadParams($componentName)
+    {
         $params = [];
 
-        if(isset($_SESSION[$componentName]) && is_array($_SESSION[$componentName])) {
+        if (isset($_SESSION[$componentName]) && is_array($_SESSION[$componentName])) {
             $params = $_SESSION[$componentName];
         }
 
         return $params;
     }
-
 }
