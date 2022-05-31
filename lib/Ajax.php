@@ -1,4 +1,5 @@
 <?php
+
 /**
  * Created by @copyright QSOFT.
  */
@@ -7,7 +8,6 @@ namespace Mindbox;
 
 class Ajax
 {
-
     public static function configureActions($actions)
     {
         $actionConfig = [];
@@ -20,7 +20,7 @@ class Ajax
     public static function errorResponse($error)
     {
         $response['type'] = 'error';
-        if(is_subclass_of($error, \Exception::class)) {
+        if (is_subclass_of($error, \Exception::class)) {
             $response['message'] = $error->getMessage();
         } else {
             $response['message'] = $error;
@@ -33,11 +33,10 @@ class Ajax
     {
         $params = [];
 
-        if(isset($_SESSION[$componentName]) && is_array($_SESSION[$componentName])) {
+        if (isset($_SESSION[$componentName]) && is_array($_SESSION[$componentName])) {
             $params = $_SESSION[$componentName];
         }
 
         return $params;
     }
-
 }
