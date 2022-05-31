@@ -4,7 +4,7 @@
     "license": "MIT",
     "minimum-stability": "stable",
     "require": {
-        "mindbox/sdk": "1.0.6"
+        "mindbox/sdk": "1.0.7"
     },
     "autoload": {
         "psr-4": {
